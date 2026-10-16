@@ -1,3 +1,5 @@
+import { drawCharacter } from "./character.js";
+
 export class Player {
   constructor(x, y) {
     this.x = x;
@@ -13,6 +15,8 @@ export class Player {
     this.maxHealth = 100;
     this.health = this.maxHealth;
     this.facing = { x: 0, y: 1 };
+    this.animationTime = 0;
+    this.moving = false;
     this.attackCooldown = 0;
     this.attackAnimation = 0;
     this.dead = false;
@@ -22,6 +26,8 @@ export class Player {
   update(delta, direction, world) {
     this.attackCooldown = Math.max(0, this.attackCooldown - delta);
     this.attackAnimation = Math.max(0, this.attackAnimation - delta);
+    this.animationTime += delta;
+    this.moving = !this.dead && (direction.x !== 0 || direction.y !== 0);
     if (this.dead) return;
 
     if (direction.x !== 0 || direction.y !== 0) {
@@ -69,41 +75,7 @@ export class Player {
   }
 
   draw(context) {
-    context.fillStyle = "rgba(20, 35, 27, 0.42)";
-    context.beginPath();
-    context.ellipse(this.x, this.y + 8, 13, 6, 0, 0, Math.PI * 2);
-    context.fill();
-
-    context.fillStyle = "#bdc98c";
-    context.fillRect(this.x - 9, this.y - 11, 18, 19);
-    context.fillStyle = "#547c55";
-    context.fillRect(this.x - 8, this.y - 2, 16, 12);
-    context.fillStyle = "#d9c49a";
-    context.fillRect(this.x - 6, this.y - 17, 12, 11);
-    context.fillStyle = "#493b32";
-    context.fillRect(this.x - 7, this.y - 19, 14, 5);
-    context.fillRect(this.x - 5, this.y - 22, 10, 4);
-    context.fillStyle = "#302d29";
-    context.fillRect(this.x + 2, this.y - 12, 2, 2);
-    context.fillStyle = "#394d38";
-    context.fillRect(this.x - 7, this.y + 8, 5, 5);
-    context.fillRect(this.x + 2, this.y + 8, 5, 5);
-
-    if (this.attackAnimation > 0) {
-      const angle = Math.atan2(this.facing.y, this.facing.x);
-      context.strokeStyle = `rgba(218, 239, 153, ${Math.min(1, this.attackAnimation * 4)})`;
-      context.lineWidth = 4;
-      context.beginPath();
-      context.arc(this.x, this.y, 25, angle - 0.72, angle + 0.72);
-      context.stroke();
-    }
-
-    context.font = "11px Manrope, sans-serif";
-    context.textAlign = "center";
-    context.fillStyle = "rgba(15, 24, 19, 0.8)";
-    context.fillText("Viajero", this.x + 1, this.y - 28);
-    context.fillStyle = "#e5eddc";
-    context.fillText("Viajero", this.x, this.y - 29);
+    drawCharacter(context, this);
   }
 }
 

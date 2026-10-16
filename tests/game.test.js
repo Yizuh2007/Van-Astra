@@ -19,6 +19,46 @@ test("el jugador sube de nivel y conserva la experiencia sobrante", () => {
   assert.equal(player.health, 120);
 });
 
+test("el jugador actualiza la orientación y la animación al moverse", () => {
+  const player = new Player(100, 100);
+  const world = { isBlocked: () => false };
+
+  player.update(0.1, { x: -1, y: 0 }, world);
+
+  assert.equal(player.moving, true);
+  assert.deepEqual(player.facing, { x: -1, y: 0 });
+  assert.ok(player.animationTime > 0);
+  assert.equal(player.x, 100 - player.speed * 0.1);
+});
+
+test("el personaje se dibuja mirando en las cuatro direcciones", () => {
+  const player = new Player(100, 100);
+  const context = {
+    arc() {},
+    beginPath() {},
+    ellipse() {},
+    fill() {},
+    fillRect() {},
+    fillText() {},
+    restore() {},
+    rotate() {},
+    save() {},
+    scale() {},
+    stroke() {},
+    translate() {},
+  };
+
+  for (const facing of [
+    { x: 0, y: -1 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 1, y: 0 },
+  ]) {
+    player.facing = facing;
+    assert.doesNotThrow(() => player.draw(context));
+  }
+});
+
 test("una criatura derrotada deja de estar activa y puede reaparecer", () => {
   const slime = new Slime(0, 100, 100);
 

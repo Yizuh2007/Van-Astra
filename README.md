@@ -4,7 +4,7 @@ Prototipo inicial de un MMORPG de fantasía en 2D, inspirado en los juegos de av
 
 ## Estado actual
 
-La primera versión es un prototipo local en el navegador. Sirve como punto de partida para construir el mundo y probar el bucle básico de exploración y combate; todavía no incluye cuentas, persistencia ni multijugador en red.
+La primera versión es un prototipo local en el navegador. El aventurero tiene un diseño pixel art original, vistas en cuatro direcciones y animación básica al caminar y atacar. Sirve como punto de partida para construir el mundo y probar el bucle básico de exploración y combate; todavía no incluye cuentas, persistencia ni multijugador en red.
 
 ## Ejecutar
 
@@ -36,6 +36,7 @@ npm test
 index.html       Interfaz del juego
 styles.css       Estilos adaptables
 src/             Lógica del cliente, el mundo y el inventario (JavaScript nativo)
+src/character.js Renderizado pixel art del personaje
 tests/           Pruebas de lógica con el ejecutor integrado de Node.js
 ```
 
