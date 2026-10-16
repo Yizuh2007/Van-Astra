@@ -1,5 +1,11 @@
 const PIXEL_SIZE = 2;
 const SPRITE_WIDTH = 16 * PIXEL_SIZE;
+const FRONT_SPRITE_SIZE = 32;
+const frontArtwork = typeof Image === "undefined" ? null : new Image();
+
+if (frontArtwork) {
+  frontArtwork.src = new URL("../assets/sprites/player-front.png", import.meta.url).href;
+}
 
 const COLORS = Object.freeze({
   o: "#292a28", // contorno
@@ -144,7 +150,14 @@ export function drawCharacter(context, player) {
   context.fill();
 
   if (facingY < 0) drawSword(context, player.x, player.y, facingX, facingY);
-  drawSprite(context, SPRITES[pose], spriteLeft, spriteTop, mirrored, walkFrame, player.moving);
+  if (pose === "front" && frontArtwork?.complete && frontArtwork.naturalWidth > 0) {
+    context.save();
+    context.imageSmoothingEnabled = false;
+    context.drawImage(frontArtwork, spriteLeft, spriteTop, FRONT_SPRITE_SIZE, FRONT_SPRITE_SIZE);
+    context.restore();
+  } else {
+    drawSprite(context, SPRITES[pose], spriteLeft, spriteTop, mirrored, walkFrame, player.moving);
+  }
   if (facingY >= 0) drawSword(context, player.x, player.y, facingX, facingY);
 
   if (player.attackAnimation > 0) {

@@ -37,8 +37,11 @@ index.html       Interfaz del juego
 styles.css       Estilos adaptables
 src/             Lógica del cliente, el mundo y el inventario (JavaScript nativo)
 src/character.js Renderizado pixel art del personaje
+assets/sprites/  Arte fuente .ase y PNG usados por el juego
 tests/           Pruebas de lógica con el ejecutor integrado de Node.js
 ```
+
+El sprite frontal actual está en `assets/sprites/player-front.ase` (editable) y `assets/sprites/player-front.png` (exportado para el navegador). Las demás direcciones usan el sprite provisional hasta tener sus dibujos.
 
 ## Próximos pasos
 
