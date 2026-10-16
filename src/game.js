@@ -1,6 +1,7 @@
 import { CREATURE_SPAWNS, PLAYER_START, TILE_SIZE, VIEWPORT } from "./config.js";
 import { Player, Slime } from "./entities.js";
 import { Input } from "./input.js";
+import { INVENTORY_CAPACITY, Inventory, ITEMS } from "./inventory.js";
 import { World } from "./world.js";
 
 export class Game {
@@ -10,6 +11,7 @@ export class Game {
     this.ui = ui;
     this.world = new World();
     this.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    this.inventory = new Inventory(INVENTORY_CAPACITY);
     this.creatures = CREATURE_SPAWNS.map(({ x, y }, index) => (
       new Slime(index, PLAYER_START.x + x, PLAYER_START.y + y)
     ));
@@ -23,6 +25,7 @@ export class Game {
     this.onPointerDown = () => this.attack();
     this.canvas.addEventListener("pointerdown", this.onPointerDown);
     this.updateHud();
+    this.renderInventory();
   }
 
   start() {
@@ -98,9 +101,18 @@ export class Game {
     const defeated = target.takeDamage(this.player.attack);
     if (defeated) {
       const levelsGained = this.player.gainExperience(target.experience);
-      this.notify(levelsGained > 0
-        ? `¡Has subido al nivel ${this.player.level}! Tu ataque y tu vida han aumentado.`
-        : `¡Criatura derrotada! +${target.experience} XP.`);
+      const gelLeftover = this.inventory.add("slime-gel", 1);
+      const coinLeftover = this.inventory.add("gold-coin", 3);
+      const loot = [];
+      if (gelLeftover < 1) loot.push("gelatina x1");
+      if (coinLeftover < 3) loot.push(`monedas x${3 - coinLeftover}`);
+
+      const message = [`¡Criatura derrotada! +${target.experience} XP.`];
+      if (levelsGained > 0) message.push(`¡Nivel ${this.player.level}! Ataque y vida aumentados.`);
+      if (loot.length > 0) message.push(`Botín: ${loot.join(", ")}.`);
+      if (gelLeftover > 0 || coinLeftover > 0) message.push("Inventario lleno: no se guardó todo el botín.");
+      this.notify(message.join(" "));
+      this.renderInventory();
     } else {
       this.notify("¡Buen golpe! La criatura sigue en pie.");
     }
@@ -125,6 +137,40 @@ export class Game {
     this.ui.attack.textContent = player.attack;
     this.ui.creatureCount.textContent = this.creatures.filter((creature) => creature.alive).length;
     this.ui.coordinates.textContent = `${Math.floor(player.x / TILE_SIZE)}, ${Math.floor(player.y / TILE_SIZE)}`;
+  }
+
+  renderInventory() {
+    this.ui.inventoryCapacity.textContent = `${this.inventory.usedSlots} / ${this.inventory.capacity}`;
+    this.ui.inventoryGrid.replaceChildren();
+
+    this.inventory.slots.forEach((entry, index) => {
+      const slot = document.createElement("div");
+      slot.className = `inventory-slot${entry ? "" : " is-empty"}`;
+      slot.setAttribute("role", "listitem");
+
+      if (!entry) {
+        slot.setAttribute("aria-label", `Espacio vacío ${index + 1}`);
+      } else {
+        const item = ITEMS[entry.itemId];
+        slot.style.setProperty("--item-color", item.color);
+        slot.setAttribute("aria-label", `${item.name}: ${entry.quantity}`);
+        slot.title = `${item.name} x${entry.quantity}`;
+
+        const icon = document.createElement("span");
+        icon.className = "inventory-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = item.icon;
+        slot.append(icon);
+
+        const quantity = document.createElement("span");
+        quantity.className = "inventory-quantity";
+        quantity.textContent = entry.quantity;
+        quantity.setAttribute("aria-hidden", "true");
+        slot.append(quantity);
+      }
+
+      this.ui.inventoryGrid.append(slot);
+    });
   }
 
   draw() {
