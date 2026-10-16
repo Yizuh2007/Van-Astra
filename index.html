@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Van Astra: prototipo de un MMORPG de fantasía en 2D."
+    />
+    <meta name="theme-color" content="#10151a" />
+    <title>Van Astra — Crónicas de Eldoria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#inicio" aria-label="Van Astra, inicio">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span class="brand-copy">
+            <strong>VAN ASTRA</strong>
+            <small>CRÓNICAS DE ELDORIA</small>
+          </span>
+        </a>
+        <div class="server-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>PROTOTIPO LOCAL</span>
+        </div>
+      </header>
+
+      <section class="game-layout" aria-label="Prototipo de Van Astra">
+        <div class="game-column">
+          <div class="scene-heading">
+            <div>
+              <p class="eyebrow">REGIÓN INICIAL</p>
+              <h1>Bosque de Eldoria</h1>
+            </div>
+            <div class="coordinates" aria-label="Coordenadas del jugador">
+              <span>POS</span>
+              <strong id="coordinates">—, —</strong>
+            </div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas
+              id="game-canvas"
+              width="960"
+              height="600"
+              aria-label="Mundo 2D. Muévete con WASD o las flechas y ataca con espacio."
+              role="img"
+            >
+              Tu navegador no admite el elemento canvas.
+            </canvas>
+            <div class="scene-tag"><span></span> ZONA SEGURA</div>
+          </div>
+
+          <div class="controls-bar">
+            <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVER</span>
+            <span><kbd>ESPACIO</kbd> ATACAR</span>
+            <span><kbd>RATÓN</kbd> ATACAR</span>
+          </div>
+        </div>
+
+        <aside class="sidebar" aria-label="Estado del personaje">
+          <section class="panel character-panel">
+            <p class="eyebrow">AVENTURERO</p>
+            <div class="character-name-row">
+              <div class="avatar" aria-hidden="true">✦</div>
+              <div>
+                <h2 id="player-name">Viajero</h2>
+                <p class="character-class">Explorador novato</p>
+              </div>
+            </div>
+            <div class="level-row">
+              <span>NIVEL <strong id="player-level">1</strong></span>
+              <span id="player-xp-label">0 / 100 XP</span>
+            </div>
+            <div class="progress-track" aria-label="Experiencia">
+              <div id="xp-bar" class="progress-fill xp-fill"></div>
+            </div>
+          </section>
+
+          <section class="panel stats-panel">
+            <p class="eyebrow">ESTADO</p>
+            <div class="stat-row">
+              <div class="stat-label"><span class="stat-icon health-icon">♥</span> VIDA</div>
+              <strong id="health-label">100 / 100</strong>
+            </div>
+            <div class="progress-track stat-track" aria-label="Puntos de vida">
+              <div id="health-bar" class="progress-fill health-fill"></div>
+            </div>
+            <div class="stat-row mana-row">
+              <div class="stat-label"><span class="stat-icon mana-icon">✧</span> MANÁ</div>
+              <strong>50 / 50</strong>
+            </div>
+            <div class="progress-track stat-track" aria-label="Maná">
+              <div class="progress-fill mana-fill"></div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-row detail-row"><span>ATAQUE</span><strong id="attack-label">12</strong></div>
+            <div class="stat-row detail-row"><span>CRIATURAS</span><strong id="creature-count">0</strong></div>
+          </section>
+
+          <section class="panel guide-panel">
+            <p class="eyebrow">PRIMEROS PASOS</p>
+            <p>Acércate a una criatura y atácala para ganar experiencia.</p>
+            <div class="hint"><span aria-hidden="true">✦</span> Cada nivel aumenta tu poder.</div>
+          </section>
+
+          <div id="game-message" class="game-message" role="status" aria-live="polite">
+            Explora el bosque y encuentra criaturas.
+          </div>
+        </aside>
+      </section>
+
+      <footer class="footer">
+        <span>VAN ASTRA <span class="footer-separator">/</span> PROTOTIPO DE DESARROLLO</span>
+        <span>Un mundo por descubrir</span>
+      </footer>
+    </main>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
