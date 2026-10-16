@@ -1,0 +1,54 @@
+const MOVEMENT_KEYS = new Set([
+  "KeyW", "KeyA", "KeyS", "KeyD",
+  "ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight",
+]);
+
+export class Input {
+  constructor() {
+    this.keys = new Set();
+    this.attackRequested = false;
+
+    window.addEventListener("keydown", this.onKeyDown);
+    window.addEventListener("keyup", this.onKeyUp);
+    window.addEventListener("blur", this.clear);
+  }
+
+  onKeyDown = (event) => {
+    if (MOVEMENT_KEYS.has(event.code) || event.code === "Space") {
+      event.preventDefault();
+    }
+
+    this.keys.add(event.code);
+    if (event.code === "Space" && !event.repeat) this.attackRequested = true;
+  };
+
+  onKeyUp = (event) => {
+    this.keys.delete(event.code);
+  };
+
+  clear = () => {
+    this.keys.clear();
+  };
+
+  direction() {
+    const x = Number(this.keys.has("KeyD") || this.keys.has("ArrowRight"))
+      - Number(this.keys.has("KeyA") || this.keys.has("ArrowLeft"));
+    const y = Number(this.keys.has("KeyS") || this.keys.has("ArrowDown"))
+      - Number(this.keys.has("KeyW") || this.keys.has("ArrowUp"));
+    const magnitude = Math.hypot(x, y) || 1;
+
+    return { x: x / magnitude, y: y / magnitude };
+  }
+
+  consumeAttack() {
+    const requested = this.attackRequested;
+    this.attackRequested = false;
+    return requested;
+  }
+
+  destroy() {
+    window.removeEventListener("keydown", this.onKeyDown);
+    window.removeEventListener("keyup", this.onKeyUp);
+    window.removeEventListener("blur", this.clear);
+  }
+}
