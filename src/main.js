@@ -16,6 +16,8 @@ const ui = {
   creatureCount: document.querySelector("#creature-count"),
   coordinates: document.querySelector("#coordinates"),
   message: document.querySelector("#game-message"),
+  inventoryGrid: document.querySelector("#inventory-grid"),
+  inventoryCapacity: document.querySelector("#inventory-capacity"),
 };
 
 const game = new Game(canvas, ui);
