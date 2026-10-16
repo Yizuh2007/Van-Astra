@@ -8,13 +8,21 @@ La primera versión es un prototipo local en el navegador. Sirve como punto de p
 
 ## Ejecutar
 
-No hacen falta dependencias ni un proceso de compilación. Desde la carpeta del proyecto, inicia un servidor estático:
+No hacen falta dependencias ni un proceso de compilación. Con Python 3, inicia el servidor estático:
 
 ```bash
 python3 -m http.server 8000
 ```
 
+También puedes iniciarlo con `npm run serve`.
+
 Abre [http://localhost:8000](http://localhost:8000) en el navegador.
+
+Para ejecutar las pruebas de lógica con Node.js:
+
+```bash
+npm test
+```
 
 ## Controles
 
@@ -27,6 +35,7 @@ Abre [http://localhost:8000](http://localhost:8000) en el navegador.
 index.html       Interfaz del juego
 styles.css       Estilos adaptables
 src/             Lógica del cliente y del mundo (JavaScript nativo)
+tests/           Pruebas de lógica con el ejecutor integrado de Node.js
 ```
 
 ## Próximos pasos
