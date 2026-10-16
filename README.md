@@ -28,13 +28,14 @@ npm test
 
 - **WASD** o **flechas**: moverse.
 - **Espacio** o **clic**: atacar a una criatura cercana.
+- Las criaturas derrotadas dejan gelatina y monedas, que se apilan en el inventario.
 
 ## Estructura
 
 ```text
 index.html       Interfaz del juego
 styles.css       Estilos adaptables
-src/             Lógica del cliente y del mundo (JavaScript nativo)
+src/             Lógica del cliente, el mundo y el inventario (JavaScript nativo)
 tests/           Pruebas de lógica con el ejecutor integrado de Node.js
 ```
 
