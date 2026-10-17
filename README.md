@@ -42,7 +42,7 @@ assets/sprites/  Arte fuente .ase y PNG usados por el juego
 tests/           Pruebas de lógica con el ejecutor integrado de Node.js
 ```
 
-El sprite frontal actual está en `assets/sprites/player-front.ase` (editable) y `assets/sprites/player-front.png` (exportado para el navegador). Las demás direcciones usan el sprite provisional hasta tener sus dibujos.
+El personaje tiene sprites propios en las cuatro direcciones. Los archivos `.ase` de `assets/sprites/` se pueden editar en LibreSprite; sus versiones PNG son las que carga el navegador.
 
 ## Próximos pasos
 

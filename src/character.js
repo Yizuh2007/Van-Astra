@@ -1,12 +1,20 @@
 const PIXEL_SIZE = 2;
 const SPRITE_WIDTH = 16 * PIXEL_SIZE;
-const FRONT_SPRITE_SIZE = 32;
-// El dibujo frontal se carga desde el PNG; las otras vistas usan los sprites definidos abajo.
-const frontArtwork = typeof Image === "undefined" ? null : new Image();
+// Si no se carga un PNG, se usa el dibujo provisional de abajo.
+function loadSpriteArtwork(filename) {
+  if (typeof Image === "undefined") return null;
 
-if (frontArtwork) {
-  frontArtwork.src = new URL("../assets/sprites/player-front.png", import.meta.url).href;
+  const artwork = new Image();
+  artwork.src = new URL(`../assets/sprites/${filename}`, import.meta.url).href;
+  return artwork;
 }
+
+const SPRITE_ARTWORK = Object.freeze({
+  front: loadSpriteArtwork("player-front.png"),
+  back: loadSpriteArtwork("player-back.png"),
+  left: loadSpriteArtwork("player-left.png"),
+  right: loadSpriteArtwork("player-right.png"),
+});
 
 const COLORS = Object.freeze({
   o: "#292a28", // contorno
@@ -135,10 +143,12 @@ function drawSprite(context, sprite, left, top, mirrored, walkFrame, moving) {
 export function drawCharacter(context, player) {
   const facingX = player.facing.x;
   const facingY = player.facing.y;
-  // El sprite lateral se refleja para reutilizar el mismo dibujo al mirar a izquierda y derecha.
   const sideFacing = Math.abs(facingX) > Math.abs(facingY);
-  const pose = sideFacing ? "side" : facingY < 0 ? "back" : "front";
-  const mirrored = pose === "side" && facingX < 0;
+  const pose = sideFacing
+    ? (facingX < 0 ? "left" : "right")
+    : (facingY < 0 ? "back" : "front");
+  const fallbackPose = sideFacing ? "side" : pose;
+  const mirrored = pose === "left";
   const walkFrame = Math.floor(player.animationTime * 9) % 2;
   const bob = player.moving
     ? Math.abs(Math.sin(player.animationTime * 9)) * 1.2
@@ -153,13 +163,14 @@ export function drawCharacter(context, player) {
 
   // El arma queda detrás al mirar hacia arriba y delante al mirar hacia abajo.
   if (facingY < 0) drawSword(context, player.x, player.y, facingX, facingY);
-  if (pose === "front" && frontArtwork?.complete && frontArtwork.naturalWidth > 0) {
+  const artwork = SPRITE_ARTWORK[pose];
+  if (artwork?.complete && artwork.naturalWidth > 0) {
     context.save();
     context.imageSmoothingEnabled = false;
-    context.drawImage(frontArtwork, spriteLeft, spriteTop, FRONT_SPRITE_SIZE, FRONT_SPRITE_SIZE);
+    context.drawImage(artwork, spriteLeft, spriteTop, SPRITE_WIDTH, SPRITE_WIDTH);
     context.restore();
   } else {
-    drawSprite(context, SPRITES[pose], spriteLeft, spriteTop, mirrored, walkFrame, player.moving);
+    drawSprite(context, SPRITES[fallbackPose], spriteLeft, spriteTop, mirrored, walkFrame, player.moving);
   }
   if (facingY >= 0) drawSword(context, player.x, player.y, facingX, facingY);
 
