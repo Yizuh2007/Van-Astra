@@ -87,6 +87,9 @@ kbd { display: inline-grid; min-width: 18px; height: 19px; place-items: center; 
 .inventory-capacity { color: #9ba7a4; font-family: var(--mono); font-size: 9px; }
 .inventory-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .inventory-slot { position: relative; display: grid; min-width: 0; aspect-ratio: 1; place-items: center; overflow: hidden; border: 1px solid #303d42; border-radius: 6px; background: linear-gradient(145deg, #202a2e, #182126); color: #65746f; }
+.inventory-slot.is-usable { padding: 0; cursor: pointer; }
+.inventory-slot.is-usable:hover { border-color: #a96c67; background: linear-gradient(145deg, #382b2c, #211f24); }
+.inventory-slot.is-usable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .inventory-slot:not(.is-empty) { border-color: color-mix(in srgb, var(--item-color) 48%, #303d42); background: linear-gradient(145deg, color-mix(in srgb, var(--item-color) 12%, #202a2e), #182126); }
 .inventory-icon { color: var(--item-color, #65746f); font-size: 19px; line-height: 1; text-shadow: 0 0 10px color-mix(in srgb, var(--item-color, #65746f) 30%, transparent); }
 .inventory-slot.is-empty::after { color: #354248; content: "·"; font-size: 18px; }

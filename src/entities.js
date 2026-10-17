@@ -50,6 +50,13 @@ export class Player {
     return true;
   }
 
+  heal(amount) {
+    if (this.dead || !Number.isFinite(amount) || amount <= 0) return 0;
+    const previousHealth = this.health;
+    this.health = Math.min(this.maxHealth, this.health + amount);
+    return this.health - previousHealth;
+  }
+
   gainExperience(amount) {
     this.xp += amount;
     let levelsGained = 0;

@@ -4,7 +4,7 @@ Prototipo inicial de un MMORPG de fantasía en 2D, inspirado en los juegos de av
 
 ## Estado actual
 
-La primera versión es un prototipo local en el navegador. El aventurero tiene un diseño pixel art original, vistas en cuatro direcciones y animación básica al caminar y atacar. Sirve como punto de partida para construir el mundo y probar el bucle básico de exploración y combate; todavía no incluye cuentas, persistencia ni multijugador en red.
+La primera versión es un prototipo local en el navegador. El aventurero tiene un diseño pixel art original, vistas en cuatro direcciones y animación básica al caminar y atacar. Sirve como punto de partida para construir el mundo y probar el bucle básico de exploración y combate; todavía no incluye cuentas ni multijugador en red. El progreso se guarda en este navegador.
 
 ## Ejecutar
 
@@ -29,7 +29,9 @@ npm test
 - **WASD** o **flechas**: moverse.
 - **Espacio** o **clic**: atacar a una criatura cercana.
 - **I**: abrir o cerrar la ficha del personaje.
-- Las criaturas derrotadas dejan gelatina y monedas, que se apilan en el inventario.
+- **Poción de vida**: pulsa su casilla en el inventario para recuperar hasta 30 puntos de vida.
+- Las criaturas derrotadas dejan gelatina y monedas; a veces también una poción de vida.
+- El nivel, la experiencia, la salud y el inventario se guardan automáticamente en este navegador.
 
 ## Estructura
 
@@ -47,7 +49,7 @@ El personaje tiene sprites propios en las cuatro direcciones. Los archivos `.ase
 ## Próximos pasos
 
 1. Separar el cliente y el servidor para habilitar partidas multijugador reales.
-2. Añadir autenticación segura, guardado de personajes y persistencia.
+2. Añadir autenticación segura y guardado de personajes en el servidor.
 3. Diseñar más zonas, criaturas, objetos y progresión.
 4. Incorporar pruebas, registro de errores y despliegue automatizado.
 

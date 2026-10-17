@@ -13,6 +13,13 @@ export const ITEMS = Object.freeze({
     color: "#e7c56f",
     maxStack: 999,
   }),
+  "health-potion": Object.freeze({
+    name: "Poción de vida",
+    icon: "+",
+    color: "#e88479",
+    maxStack: 10,
+    healAmount: 30,
+  }),
 });
 
 export class Inventory {
@@ -58,6 +65,43 @@ export class Inventory {
     }
 
     return remaining;
+  }
+
+  remove(itemId, quantity = 1) {
+    if (!ITEMS[itemId]) throw new Error(`Objeto desconocido: ${itemId}`);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new RangeError("La cantidad debe ser un entero positivo.");
+    }
+    if (this.count(itemId) < quantity) return false;
+
+    let remaining = quantity;
+    for (let index = 0; index < this.slots.length && remaining > 0; index += 1) {
+      const slot = this.slots[index];
+      if (!slot || slot.itemId !== itemId) continue;
+
+      const removed = Math.min(slot.quantity, remaining);
+      slot.quantity -= removed;
+      remaining -= removed;
+      if (slot.quantity === 0) this.slots[index] = null;
+    }
+
+    return true;
+  }
+
+  restore(savedSlots) {
+    if (!Array.isArray(savedSlots)) return false;
+
+    this.slots = Array.from({ length: this.capacity }, (_, index) => {
+      const entry = savedSlots[index];
+      const item = entry && ITEMS[entry.itemId];
+      if (!item || !Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > item.maxStack) {
+        return null;
+      }
+
+      return { itemId: entry.itemId, quantity: entry.quantity };
+    });
+
+    return true;
   }
 
   count(itemId) {

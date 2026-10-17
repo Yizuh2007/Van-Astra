@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { Game } from "../src/game.js";
 import { Player, Slime } from "../src/entities.js";
-import { TILE_SIZE } from "../src/config.js";
+import { PLAYER_START, TILE_SIZE } from "../src/config.js";
+import { Inventory } from "../src/inventory.js";
 import { World } from "../src/world.js";
 
 test("el jugador sube de nivel y conserva la experiencia sobrante", () => {
@@ -17,6 +19,65 @@ test("el jugador sube de nivel y conserva la experiencia sobrante", () => {
   assert.equal(player.attack, 15);
   assert.equal(player.maxHealth, 120);
   assert.equal(player.health, 120);
+});
+
+test("la poción recupera vida sin superar el máximo", () => {
+  const player = new Player(100, 100);
+  player.health = 80;
+
+  assert.equal(player.heal(30), 20);
+  assert.equal(player.health, player.maxHealth);
+});
+
+test("el guardado local conserva el progreso y el inventario", () => {
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const values = new Map();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, value),
+    },
+  });
+
+  try {
+    const savedGame = Object.create(Game.prototype);
+    savedGame.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    savedGame.player.level = 3;
+    savedGame.player.xp = 25;
+    savedGame.player.nextLevelXp = 200;
+    savedGame.player.attack = 18;
+    savedGame.player.maxHealth = 140;
+    savedGame.player.health = 65;
+    savedGame.player.x += TILE_SIZE;
+    savedGame.world = new World();
+    savedGame.inventory = new Inventory();
+    savedGame.inventory.add("health-potion", 2);
+    savedGame.inventory.add("gold-coin", 6);
+
+    assert.equal(savedGame.saveGame(), true);
+
+    const loadedGame = Object.create(Game.prototype);
+    loadedGame.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    loadedGame.world = new World();
+    loadedGame.inventory = new Inventory();
+    loadedGame.ui = { message: { textContent: "" } };
+    loadedGame.messageTimer = 0;
+
+    assert.equal(loadedGame.loadGame(), true);
+    assert.equal(loadedGame.player.level, 3);
+    assert.equal(loadedGame.player.xp, 25);
+    assert.equal(loadedGame.player.health, 65);
+    assert.equal(loadedGame.player.x, PLAYER_START.x + TILE_SIZE);
+    assert.equal(loadedGame.inventory.count("health-potion"), 2);
+    assert.equal(loadedGame.inventory.count("gold-coin"), 6);
+  } finally {
+    if (previousStorage) {
+      Object.defineProperty(globalThis, "localStorage", previousStorage);
+    } else {
+      delete globalThis.localStorage;
+    }
+  }
 });
 
 test("el jugador actualiza la orientación y la animación al moverse", () => {
