@@ -34,6 +34,7 @@ export class Player {
       this.facing = direction;
       const nextX = this.x + direction.x * this.speed * delta;
       const nextY = this.y + direction.y * this.speed * delta;
+      // Al comprobar cada eje por separado, el jugador puede deslizarse junto a un obstáculo.
       if (!world.isBlocked(nextX, this.y, this.radius)) this.x = nextX;
       if (!world.isBlocked(this.x, nextY, this.radius)) this.y = nextY;
     }
@@ -53,6 +54,7 @@ export class Player {
     this.xp += amount;
     let levelsGained = 0;
 
+    // Se conserva la experiencia sobrante y cada nivel requiere 50 puntos más que el anterior.
     while (this.xp >= this.nextLevelXp) {
       this.xp -= this.nextLevelXp;
       this.level += 1;
@@ -109,6 +111,7 @@ export class Slime {
     const distance = Math.hypot(dx, dy);
     let direction = { x: 0, y: 0 };
 
+    // El slime persigue al jugador si está cerca; si no, deambula alrededor de su punto inicial.
     if (!player.dead && distance < 155 && distance > 30) {
       direction = { x: dx / distance, y: dy / distance };
     } else {

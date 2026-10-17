@@ -33,6 +33,7 @@ export class Game {
   }
 
   frame = (timestamp) => {
+    // Limitar el tiempo entre cuadros evita saltos grandes si el navegador se pausa un momento.
     const delta = Math.min((timestamp - this.lastFrame) / 1000 || 0, 0.05);
     this.lastFrame = timestamp;
     this.update(delta);
@@ -84,6 +85,7 @@ export class Game {
 
     let target = null;
     let nearestDistance = 64;
+    // El golpe alcanza a la criatura viva más cercana dentro del rango, sin apuntar directamente.
     for (const creature of this.creatures) {
       if (!creature.alive) continue;
       const distance = Math.hypot(this.player.x - creature.x, this.player.y - creature.y);

@@ -41,6 +41,7 @@ export class Inventory {
 
     let remaining = quantity;
 
+    // Primero completa las pilas existentes y después ocupa espacios libres; devuelve lo que no cabe.
     for (const slot of this.slots) {
       if (!slot || slot.itemId !== itemId || slot.quantity >= item.maxStack) continue;
       const added = Math.min(item.maxStack - slot.quantity, remaining);

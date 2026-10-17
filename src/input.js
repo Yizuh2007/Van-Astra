@@ -10,6 +10,7 @@ export class Input {
 
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
+    // Si se pierde el foco de la ventana, se sueltan las teclas para que no queden atascadas.
     window.addEventListener("blur", this.clear);
   }
 
@@ -19,6 +20,7 @@ export class Input {
     }
 
     this.keys.add(event.code);
+    // Solo se registra el primer evento de espacio, no las repeticiones mientras se mantiene pulsado.
     if (event.code === "Space" && !event.repeat) this.attackRequested = true;
   };
 
@@ -35,6 +37,7 @@ export class Input {
       - Number(this.keys.has("KeyA") || this.keys.has("ArrowLeft"));
     const y = Number(this.keys.has("KeyS") || this.keys.has("ArrowDown"))
       - Number(this.keys.has("KeyW") || this.keys.has("ArrowUp"));
+    // Normalizar mantiene la misma velocidad al moverse en diagonal.
     const magnitude = Math.hypot(x, y) || 1;
 
     return { x: x / magnitude, y: y / magnitude };

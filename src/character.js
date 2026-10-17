@@ -1,6 +1,7 @@
 const PIXEL_SIZE = 2;
 const SPRITE_WIDTH = 16 * PIXEL_SIZE;
 const FRONT_SPRITE_SIZE = 32;
+// El dibujo frontal se carga desde el PNG; las otras vistas usan los sprites definidos abajo.
 const frontArtwork = typeof Image === "undefined" ? null : new Image();
 
 if (frontArtwork) {
@@ -134,6 +135,7 @@ function drawSprite(context, sprite, left, top, mirrored, walkFrame, moving) {
 export function drawCharacter(context, player) {
   const facingX = player.facing.x;
   const facingY = player.facing.y;
+  // El sprite lateral se refleja para reutilizar el mismo dibujo al mirar a izquierda y derecha.
   const sideFacing = Math.abs(facingX) > Math.abs(facingY);
   const pose = sideFacing ? "side" : facingY < 0 ? "back" : "front";
   const mirrored = pose === "side" && facingX < 0;
@@ -149,6 +151,7 @@ export function drawCharacter(context, player) {
   context.ellipse(player.x, player.y + 10, 12 + bob * 0.4, 5, 0, 0, Math.PI * 2);
   context.fill();
 
+  // El arma queda detrás al mirar hacia arriba y delante al mirar hacia abajo.
   if (facingY < 0) drawSword(context, player.x, player.y, facingX, facingY);
   if (pose === "front" && frontArtwork?.complete && frontArtwork.naturalWidth > 0) {
     context.save();

@@ -4,6 +4,7 @@ const COLUMNS = 48;
 const ROWS = 36;
 const GRASS_COLORS = ["#426d45", "#467348", "#3e6942", "#49764a"];
 
+// El resultado depende de la posición, así que el mapa conserva los mismos adornos al redibujarse.
 function tileHash(column, row, salt = 0) {
   const value = Math.sin(column * 127.1 + row * 311.7 + salt * 74.7) * 43758.5453;
   return value - Math.floor(value);
@@ -28,6 +29,7 @@ export class World {
     for (let row = 1; row < ROWS - 1; row += 1) {
       for (let column = 1; column < COLUMNS - 1; column += 1) {
         const nearStart = Math.hypot(column - 24, row - 18) < 6;
+        // Se deja libre el camino y el área de inicio para que el jugador pueda salir sin obstáculos.
         if (nearStart || this.isPath(column, row)) continue;
 
         const chance = tileHash(column, row);
