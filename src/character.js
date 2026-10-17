@@ -140,6 +140,36 @@ function drawSprite(context, sprite, left, top, mirrored, walkFrame, moving) {
   context.restore();
 }
 
+function drawWalkingArtwork(context, artwork, pose, left, top, walkFrame) {
+  const feetTop = 23;
+  const feetHeight = SPRITE_WIDTH - feetTop;
+  const halfWidth = SPRITE_WIDTH / 2;
+  const step = walkFrame === 0 ? 1 : -1;
+
+  context.drawImage(artwork, 0, 0, SPRITE_WIDTH, feetTop + 1, left, top, SPRITE_WIDTH, feetTop + 1);
+
+  if (pose === "front" || pose === "back") {
+    context.drawImage(
+      artwork,
+      0, feetTop, halfWidth, feetHeight,
+      left, top + feetTop + step, halfWidth, feetHeight,
+    );
+    context.drawImage(
+      artwork,
+      halfWidth, feetTop, halfWidth, feetHeight,
+      left + halfWidth, top + feetTop - step, halfWidth, feetHeight,
+    );
+    return;
+  }
+
+  const direction = pose === "left" ? -1 : 1;
+  context.drawImage(
+    artwork,
+    0, feetTop, SPRITE_WIDTH, feetHeight,
+    left + step * direction, top + feetTop, SPRITE_WIDTH, feetHeight,
+  );
+}
+
 export function drawCharacter(context, player) {
   const facingX = player.facing.x;
   const facingY = player.facing.y;
@@ -167,7 +197,12 @@ export function drawCharacter(context, player) {
   if (artwork?.complete && artwork.naturalWidth > 0) {
     context.save();
     context.imageSmoothingEnabled = false;
-    context.drawImage(artwork, spriteLeft, spriteTop, SPRITE_WIDTH, SPRITE_WIDTH);
+    if (player.moving) {
+      // Separo la parte de abajo para que los pies alternen el paso al andar.
+      drawWalkingArtwork(context, artwork, pose, spriteLeft, spriteTop, walkFrame);
+    } else {
+      context.drawImage(artwork, spriteLeft, spriteTop, SPRITE_WIDTH, SPRITE_WIDTH);
+    }
     context.restore();
   } else {
     drawSprite(context, SPRITES[fallbackPose], spriteLeft, spriteTop, mirrored, walkFrame, player.moving);
