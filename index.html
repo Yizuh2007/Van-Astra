@@ -83,6 +83,16 @@
             <div class="progress-track" aria-label="Experiencia">
               <div id="xp-bar" class="progress-fill xp-fill"></div>
             </div>
+            <button
+              id="open-character-sheet"
+              class="sheet-trigger"
+              type="button"
+              aria-haspopup="dialog"
+              aria-controls="character-sheet"
+            >
+              <span>VER FICHA</span>
+              <kbd>I</kbd>
+            </button>
           </section>
 
           <section class="panel stats-panel">
@@ -136,6 +146,71 @@
         <span>VAN ASTRA <span class="footer-separator">/</span> PROTOTIPO DE DESARROLLO</span>
         <span>Un mundo por descubrir</span>
       </footer>
+
+      <dialog
+        id="character-sheet"
+        class="character-sheet"
+        aria-labelledby="character-sheet-title"
+      >
+        <div class="sheet-heading">
+          <div>
+            <p class="eyebrow">AVENTURERO</p>
+            <h2 id="character-sheet-title">Ficha del personaje</h2>
+          </div>
+          <button
+            id="close-character-sheet"
+            class="sheet-close"
+            type="button"
+            aria-label="Cerrar ficha"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="sheet-identity">
+          <div class="avatar" aria-hidden="true">✦</div>
+          <div>
+            <h3>Viajero</h3>
+            <p class="character-class">Explorador novato</p>
+          </div>
+          <div class="sheet-level">
+            <span>NIVEL</span>
+            <strong id="sheet-level">1</strong>
+          </div>
+        </div>
+
+        <section class="sheet-experience" aria-label="Experiencia del personaje">
+          <div class="sheet-stat-heading">
+            <span>EXPERIENCIA</span>
+            <strong id="sheet-xp-label">0 / 100 XP</strong>
+          </div>
+          <div class="progress-track">
+            <div id="sheet-xp-bar" class="progress-fill xp-fill"></div>
+          </div>
+        </section>
+
+        <div class="sheet-stats">
+          <div class="sheet-stat-card">
+            <div class="sheet-stat-heading">
+              <span>VIDA</span>
+              <strong id="sheet-health-label">100 / 100</strong>
+            </div>
+            <div class="progress-track">
+              <div id="sheet-health-bar" class="progress-fill health-fill"></div>
+            </div>
+          </div>
+          <div class="sheet-stat-card">
+            <span class="sheet-stat-name">ATAQUE</span>
+            <strong id="sheet-attack" class="sheet-stat-value">12</strong>
+          </div>
+          <div class="sheet-stat-card">
+            <span class="sheet-stat-name">POSICIÓN</span>
+            <strong id="sheet-coordinates" class="sheet-stat-value">24, 18</strong>
+          </div>
+        </div>
+
+        <p class="sheet-hint">Pulsa I o Esc para cerrar la ficha.</p>
+      </dialog>
     </main>
     <script type="module" src="src/main.js"></script>
   </body>

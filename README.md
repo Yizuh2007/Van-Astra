@@ -28,6 +28,7 @@ npm test
 
 - **WASD** o **flechas**: moverse.
 - **Espacio** o **clic**: atacar a una criatura cercana.
+- **I**: abrir o cerrar la ficha del personaje.
 - Las criaturas derrotadas dejan gelatina y monedas, que se apilan en el inventario.
 
 ## Estructura

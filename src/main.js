@@ -18,6 +18,16 @@ const ui = {
   message: document.querySelector("#game-message"),
   inventoryGrid: document.querySelector("#inventory-grid"),
   inventoryCapacity: document.querySelector("#inventory-capacity"),
+  characterSheet: document.querySelector("#character-sheet"),
+  openCharacterSheet: document.querySelector("#open-character-sheet"),
+  closeCharacterSheet: document.querySelector("#close-character-sheet"),
+  sheetLevel: document.querySelector("#sheet-level"),
+  sheetXpLabel: document.querySelector("#sheet-xp-label"),
+  sheetXpBar: document.querySelector("#sheet-xp-bar"),
+  sheetHealthLabel: document.querySelector("#sheet-health-label"),
+  sheetHealthBar: document.querySelector("#sheet-health-bar"),
+  sheetAttack: document.querySelector("#sheet-attack"),
+  sheetCoordinates: document.querySelector("#sheet-coordinates"),
 };
 
 const game = new Game(canvas, ui);

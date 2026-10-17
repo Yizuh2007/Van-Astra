@@ -23,7 +23,25 @@ export class Game {
     this.camera = { x: 0, y: 0 };
 
     this.onPointerDown = () => this.attack();
+    this.onCharacterSheetKeyDown = (event) => {
+      if (this.ui.characterSheet.open) {
+        this.input.clear();
+        this.input.consumeAttack();
+      }
+      if (event.code !== "KeyI" || event.repeat) return;
+      this.toggleCharacterSheet();
+    };
+    this.onOpenCharacterSheet = () => this.ui.characterSheet.showModal();
+    this.onCloseCharacterSheet = () => this.ui.characterSheet.close();
+    this.onCharacterSheetBackdropClick = (event) => {
+      if (event.target === this.ui.characterSheet) this.ui.characterSheet.close();
+    };
+
     this.canvas.addEventListener("pointerdown", this.onPointerDown);
+    window.addEventListener("keydown", this.onCharacterSheetKeyDown);
+    this.ui.openCharacterSheet.addEventListener("click", this.onOpenCharacterSheet);
+    this.ui.closeCharacterSheet.addEventListener("click", this.onCloseCharacterSheet);
+    this.ui.characterSheet.addEventListener("click", this.onCharacterSheetBackdropClick);
     this.updateHud();
     this.renderInventory();
   }
@@ -42,6 +60,14 @@ export class Game {
   };
 
   update(delta) {
+    if (this.ui.characterSheet.open) {
+      // La ficha pausa el juego y descarta teclas para evitar mover al personaje mientras está abierta.
+      this.input.clear();
+      this.input.consumeAttack();
+      this.player.update(delta, { x: 0, y: 0 }, this.world);
+      return;
+    }
+
     this.player.update(delta, this.input.direction(), this.world);
     if (this.input.consumeAttack()) this.attack();
 
@@ -126,10 +152,19 @@ export class Game {
     this.messageTimer = 3;
   }
 
+  toggleCharacterSheet() {
+    if (this.ui.characterSheet.open) {
+      this.ui.characterSheet.close();
+    } else {
+      this.ui.characterSheet.showModal();
+    }
+  }
+
   updateHud() {
     const { player } = this;
     const xpPercent = (player.xp / player.nextLevelXp) * 100;
     const healthPercent = (player.health / player.maxHealth) * 100;
+    const coordinates = `${Math.floor(player.x / TILE_SIZE)}, ${Math.floor(player.y / TILE_SIZE)}`;
 
     this.ui.level.textContent = player.level;
     this.ui.xpLabel.textContent = `${player.xp} / ${player.nextLevelXp} XP`;
@@ -138,7 +173,14 @@ export class Game {
     this.ui.healthBar.style.width = `${healthPercent}%`;
     this.ui.attack.textContent = player.attack;
     this.ui.creatureCount.textContent = this.creatures.filter((creature) => creature.alive).length;
-    this.ui.coordinates.textContent = `${Math.floor(player.x / TILE_SIZE)}, ${Math.floor(player.y / TILE_SIZE)}`;
+    this.ui.coordinates.textContent = coordinates;
+    this.ui.sheetLevel.textContent = player.level;
+    this.ui.sheetXpLabel.textContent = `${player.xp} / ${player.nextLevelXp} XP`;
+    this.ui.sheetXpBar.style.width = `${xpPercent}%`;
+    this.ui.sheetHealthLabel.textContent = `${player.health} / ${player.maxHealth}`;
+    this.ui.sheetHealthBar.style.width = `${healthPercent}%`;
+    this.ui.sheetAttack.textContent = player.attack;
+    this.ui.sheetCoordinates.textContent = coordinates;
   }
 
   renderInventory() {
@@ -198,5 +240,9 @@ export class Game {
     cancelAnimationFrame(this.animationFrame);
     this.input.destroy();
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
+    window.removeEventListener("keydown", this.onCharacterSheetKeyDown);
+    this.ui.openCharacterSheet.removeEventListener("click", this.onOpenCharacterSheet);
+    this.ui.closeCharacterSheet.removeEventListener("click", this.onCloseCharacterSheet);
+    this.ui.characterSheet.removeEventListener("click", this.onCharacterSheetBackdropClick);
   }
 }
