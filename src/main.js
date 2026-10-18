@@ -8,6 +8,7 @@ if (!(canvas instanceof HTMLCanvasElement)) {
 
 const ui = {
   level: document.querySelector("#player-level"),
+  playerName: document.querySelector("#player-name"),
   xpLabel: document.querySelector("#player-xp-label"),
   xpBar: document.querySelector("#xp-bar"),
   healthLabel: document.querySelector("#health-label"),
@@ -22,12 +23,19 @@ const ui = {
   openCharacterSheet: document.querySelector("#open-character-sheet"),
   closeCharacterSheet: document.querySelector("#close-character-sheet"),
   sheetLevel: document.querySelector("#sheet-level"),
+  sheetPlayerName: document.querySelector("#sheet-player-name"),
   sheetXpLabel: document.querySelector("#sheet-xp-label"),
   sheetXpBar: document.querySelector("#sheet-xp-bar"),
   sheetHealthLabel: document.querySelector("#sheet-health-label"),
   sheetHealthBar: document.querySelector("#sheet-health-bar"),
   sheetAttack: document.querySelector("#sheet-attack"),
   sheetCoordinates: document.querySelector("#sheet-coordinates"),
+  profileSelect: document.querySelector("#character-profile-select"),
+  showProfileForm: document.querySelector("#show-profile-form"),
+  newProfileForm: document.querySelector("#new-profile-form"),
+  newProfileName: document.querySelector("#new-profile-name"),
+  cancelProfileForm: document.querySelector("#cancel-profile-form"),
+  profileFormMessage: document.querySelector("#profile-form-message"),
 };
 
 const game = new Game(canvas, ui);

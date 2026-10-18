@@ -6,6 +6,7 @@ const DAMAGE_FLASH_DURATION = 0.18;
 
 export class Player {
   constructor(x, y) {
+    this.name = "Viajero";
     this.x = x;
     this.y = y;
     this.startX = x;

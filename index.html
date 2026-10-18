@@ -170,7 +170,7 @@
         <div class="sheet-identity">
           <div class="avatar" aria-hidden="true">✦</div>
           <div>
-            <h3>Viajero</h3>
+            <h3 id="sheet-player-name">Viajero</h3>
             <p class="character-class">Explorador novato</p>
           </div>
           <div class="sheet-level">
@@ -178,6 +178,30 @@
             <strong id="sheet-level">1</strong>
           </div>
         </div>
+
+        <section class="sheet-profiles" aria-label="Personajes guardados">
+          <div class="sheet-stat-heading">
+            <label for="character-profile-select">PERSONAJES</label>
+            <button
+              id="show-profile-form"
+              class="profile-action"
+              type="button"
+              aria-controls="new-profile-form"
+            >
+              NUEVO
+            </button>
+          </div>
+          <select id="character-profile-select" class="profile-select" aria-label="Personaje activo"></select>
+          <form id="new-profile-form" class="new-profile-form" hidden>
+            <label for="new-profile-name">Nombre del personaje</label>
+            <input id="new-profile-name" name="name" type="text" maxlength="16" autocomplete="off" required />
+            <div class="profile-form-buttons">
+              <button id="cancel-profile-form" class="profile-action" type="button">CANCELAR</button>
+              <button class="profile-action" type="submit">CREAR</button>
+            </div>
+            <p id="profile-form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
 
         <section class="sheet-experience" aria-label="Experiencia del personaje">
           <div class="sheet-stat-heading">

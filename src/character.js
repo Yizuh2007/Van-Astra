@@ -171,6 +171,7 @@ function drawWalkingArtwork(context, artwork, pose, left, top, walkFrame) {
 }
 
 export function drawCharacter(context, player) {
+  const playerName = player.name || "Viajero";
   const facingX = player.facing.x;
   const facingY = player.facing.y;
   const sideFacing = Math.abs(facingX) > Math.abs(facingY);
@@ -229,7 +230,7 @@ export function drawCharacter(context, player) {
   context.font = "11px Manrope, sans-serif";
   context.textAlign = "center";
   context.fillStyle = "rgba(15, 24, 19, 0.8)";
-  context.fillText("Viajero", player.x + 1, player.y - 30);
+  context.fillText(playerName, player.x + 1, player.y - 30);
   context.fillStyle = "#e5eddc";
-  context.fillText("Viajero", player.x, player.y - 31);
+  context.fillText(playerName, player.x, player.y - 31);
 }

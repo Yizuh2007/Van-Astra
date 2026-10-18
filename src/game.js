@@ -5,6 +5,7 @@ import { INVENTORY_CAPACITY, Inventory, ITEMS } from "./inventory.js";
 import { World } from "./world.js";
 
 const SAVE_KEY = "van-astra-save-v1";
+const PROFILES_SAVE_KEY = "van-astra-profiles-v1";
 
 export class Game {
   constructor(canvas, ui) {
@@ -14,6 +15,8 @@ export class Game {
     this.world = new World();
     this.player = new Player(PLAYER_START.x, PLAYER_START.y);
     this.inventory = new Inventory(INVENTORY_CAPACITY);
+    this.profiles = [];
+    this.activeProfileId = null;
     this.creatures = CREATURE_SPAWNS.map(({ x, y }, index) => (
       new Slime(index, PLAYER_START.x + x, PLAYER_START.y + y)
     ));
@@ -27,11 +30,20 @@ export class Game {
     if (!this.loadGame()) {
       // Una poción inicial permite probar el inventario desde el principio.
       this.inventory.add("health-potion", 1);
+      this.activeProfileId = "default";
+      this.profiles = [{
+        id: this.activeProfileId,
+        name: this.player.name,
+        player: this.serializePlayer(),
+        inventory: this.inventory.slots,
+      }];
+      this.saveGame();
     }
 
     this.onPointerDown = () => this.attack();
     this.onBeforeUnload = () => this.saveGame();
     this.onCharacterSheetKeyDown = (event) => {
+      if (["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(event.target?.tagName)) return;
       if (this.ui.characterSheet.open) {
         this.input.clear();
         this.input.consumeAttack();
@@ -44,6 +56,21 @@ export class Game {
     this.onCharacterSheetBackdropClick = (event) => {
       if (event.target === this.ui.characterSheet) this.ui.characterSheet.close();
     };
+    this.onProfileChange = () => this.switchProfile(this.ui.profileSelect.value);
+    this.onShowProfileForm = () => {
+      this.ui.profileFormMessage.textContent = "";
+      this.ui.newProfileForm.hidden = false;
+      this.ui.newProfileName.focus();
+    };
+    this.onCancelProfileForm = () => {
+      this.ui.newProfileForm.reset();
+      this.ui.newProfileForm.hidden = true;
+      this.ui.profileFormMessage.textContent = "";
+    };
+    this.onSubmitProfileForm = (event) => {
+      event.preventDefault();
+      this.createProfile(this.ui.newProfileName.value);
+    };
 
     this.canvas.addEventListener("pointerdown", this.onPointerDown);
     window.addEventListener("beforeunload", this.onBeforeUnload);
@@ -51,8 +78,13 @@ export class Game {
     this.ui.openCharacterSheet.addEventListener("click", this.onOpenCharacterSheet);
     this.ui.closeCharacterSheet.addEventListener("click", this.onCloseCharacterSheet);
     this.ui.characterSheet.addEventListener("click", this.onCharacterSheetBackdropClick);
+    this.ui.profileSelect.addEventListener("change", this.onProfileChange);
+    this.ui.showProfileForm.addEventListener("click", this.onShowProfileForm);
+    this.ui.cancelProfileForm.addEventListener("click", this.onCancelProfileForm);
+    this.ui.newProfileForm.addEventListener("submit", this.onSubmitProfileForm);
     this.updateHud();
     this.renderInventory();
+    this.renderProfiles();
   }
 
   start() {
@@ -179,64 +211,182 @@ export class Game {
 
   loadGame() {
     try {
-      const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
-      if (saved?.version !== 1 || !saved.player) return false;
+      const storedProfiles = localStorage.getItem(PROFILES_SAVE_KEY);
+      if (storedProfiles) {
+        const saved = JSON.parse(storedProfiles);
+        if (saved?.version === 1 && Array.isArray(saved.profiles)) {
+          this.profiles = saved.profiles.filter((profile) => (
+            profile && typeof profile.id === "string"
+            && typeof profile.name === "string" && profile.name.trim()
+            && profile.player && Array.isArray(profile.inventory)
+          ));
 
-      const player = saved.player;
-      const { radius } = this.player;
-      const insideWorld = Number.isFinite(player.x) && Number.isFinite(player.y)
-        && player.x >= radius && player.y >= radius
-        && player.x <= this.world.width - radius && player.y <= this.world.height - radius;
-      // Si quedó dentro de un obstáculo, conserva la posición inicial.
-      if (insideWorld && !this.world.isBlocked(player.x, player.y, radius)) {
-        this.player.x = player.x;
-        this.player.y = player.y;
+          if (this.profiles.length > 0) {
+            const activeProfile = this.profiles.find((profile) => (
+              profile.id === saved.activeProfileId
+            )) || this.profiles[0];
+            this.activeProfileId = activeProfile.id;
+            this.loadProfile(activeProfile);
+            this.notify("Partida cargada.");
+            return true;
+          }
+        }
       }
+    } catch {
+      // Si el archivo de perfiles está dañado, se prueba el guardado anterior.
+    }
 
-      if (Number.isInteger(player.level) && player.level > 0) this.player.level = player.level;
-      if (Number.isInteger(player.nextLevelXp) && player.nextLevelXp > 0) {
-        this.player.nextLevelXp = player.nextLevelXp;
+    try {
+      const oldSave = JSON.parse(localStorage.getItem(SAVE_KEY));
+      if (oldSave?.version === 1 && oldSave.player) {
+        const oldProfile = {
+          id: "default",
+          name: "Viajero",
+          player: oldSave.player,
+          inventory: Array.isArray(oldSave.inventory) ? oldSave.inventory : [],
+        };
+        this.profiles = [oldProfile];
+        this.activeProfileId = oldProfile.id;
+        this.loadProfile(oldProfile);
+        this.saveGame();
+        this.notify("Partida cargada.");
+        return true;
       }
-      if (Number.isInteger(player.xp) && player.xp >= 0) {
-        this.player.xp = Math.min(player.xp, this.player.nextLevelXp - 1);
-      }
-      if (Number.isInteger(player.attack) && player.attack > 0) this.player.attack = player.attack;
-      if (Number.isInteger(player.maxHealth) && player.maxHealth > 0) {
-        this.player.maxHealth = player.maxHealth;
-      }
-      this.player.health = Number.isInteger(player.health) && player.health > 0
-        ? Math.min(player.health, this.player.maxHealth)
-        : this.player.maxHealth;
-      if (Array.isArray(saved.inventory)) this.inventory.restore(saved.inventory);
+    } catch {
+      return false;
+    }
 
-      this.notify("Partida cargada.");
+    return false;
+  }
+
+  loadProfile(profile) {
+    this.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    this.player.name = profile.name;
+    const player = profile.player;
+    const { radius } = this.player;
+    const insideWorld = Number.isFinite(player.x) && Number.isFinite(player.y)
+      && player.x >= radius && player.y >= radius
+      && player.x <= this.world.width - radius && player.y <= this.world.height - radius;
+    if (insideWorld && !this.world.isBlocked(player.x, player.y, radius)) {
+      this.player.x = player.x;
+      this.player.y = player.y;
+    }
+
+    if (Number.isInteger(player.level) && player.level > 0) this.player.level = player.level;
+    if (Number.isInteger(player.nextLevelXp) && player.nextLevelXp > 0) {
+      this.player.nextLevelXp = player.nextLevelXp;
+    }
+    if (Number.isInteger(player.xp) && player.xp >= 0) {
+      this.player.xp = Math.min(player.xp, this.player.nextLevelXp - 1);
+    }
+    if (Number.isInteger(player.attack) && player.attack > 0) this.player.attack = player.attack;
+    if (Number.isInteger(player.maxHealth) && player.maxHealth > 0) {
+      this.player.maxHealth = player.maxHealth;
+    }
+    this.player.health = Number.isInteger(player.health) && player.health > 0
+      ? Math.min(player.health, this.player.maxHealth)
+      : this.player.maxHealth;
+
+    this.inventory = new Inventory(INVENTORY_CAPACITY);
+    this.inventory.restore(profile.inventory);
+  }
+
+  serializePlayer(player = this.player) {
+    return {
+      name: player.name,
+      x: player.dead ? player.startX : player.x,
+      y: player.dead ? player.startY : player.y,
+      level: player.level,
+      xp: player.xp,
+      nextLevelXp: player.nextLevelXp,
+      attack: player.attack,
+      maxHealth: player.maxHealth,
+      health: player.dead ? player.maxHealth : player.health,
+    };
+  }
+
+  saveGame() {
+    try {
+      const profile = this.profiles.find(({ id }) => id === this.activeProfileId);
+      if (!profile) return false;
+
+      profile.name = this.player.name;
+      profile.player = this.serializePlayer();
+      profile.inventory = this.inventory.slots;
+      localStorage.setItem(PROFILES_SAVE_KEY, JSON.stringify({
+        version: 1,
+        activeProfileId: this.activeProfileId,
+        profiles: this.profiles,
+      }));
       return true;
     } catch {
       return false;
     }
   }
 
-  saveGame() {
-    try {
-      const { player } = this;
-      localStorage.setItem(SAVE_KEY, JSON.stringify({
-        version: 1,
-        player: {
-          x: player.dead ? player.startX : player.x,
-          y: player.dead ? player.startY : player.y,
-          level: player.level,
-          xp: player.xp,
-          nextLevelXp: player.nextLevelXp,
-          attack: player.attack,
-          maxHealth: player.maxHealth,
-          health: player.dead ? player.maxHealth : player.health,
-        },
-        inventory: this.inventory.slots,
-      }));
-      return true;
-    } catch {
+  createProfile(name) {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      this.ui.profileFormMessage.textContent = "Escribe un nombre para el personaje.";
       return false;
     }
+    if (trimmedName.length > 16) {
+      this.ui.profileFormMessage.textContent = "El nombre no puede tener más de 16 caracteres.";
+      return false;
+    }
+    if (this.profiles.some((profile) => profile.name.toLowerCase() === trimmedName.toLowerCase())) {
+      this.ui.profileFormMessage.textContent = "Ya existe un personaje con ese nombre.";
+      return false;
+    }
+
+    this.saveGame();
+    const player = new Player(PLAYER_START.x, PLAYER_START.y);
+    player.name = trimmedName;
+    const inventory = new Inventory(INVENTORY_CAPACITY);
+    inventory.add("health-potion", 1);
+    const profile = {
+      id: `profile-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmedName,
+      player: this.serializePlayer(player),
+      inventory: inventory.slots,
+    };
+    this.profiles.push(profile);
+    this.activeProfileId = profile.id;
+    this.loadProfile(profile);
+    this.ui.newProfileForm.reset();
+    this.ui.newProfileForm.hidden = true;
+    this.ui.profileFormMessage.textContent = "";
+    this.renderProfiles();
+    this.updateHud();
+    this.renderInventory();
+    this.notify(`Personaje ${trimmedName} creado.`);
+    this.saveGame();
+    return true;
+  }
+
+  switchProfile(profileId) {
+    if (!profileId || profileId === this.activeProfileId) return;
+    const profile = this.profiles.find((entry) => entry.id === profileId);
+    if (!profile) return;
+
+    this.saveGame();
+    this.activeProfileId = profile.id;
+    this.loadProfile(profile);
+    this.renderProfiles();
+    this.updateHud();
+    this.renderInventory();
+    this.notify(`Has cambiado a ${profile.name}.`);
+  }
+
+  renderProfiles() {
+    this.ui.profileSelect.replaceChildren();
+    this.profiles.forEach((profile) => {
+      const option = document.createElement("option");
+      option.value = profile.id;
+      option.textContent = profile.name;
+      this.ui.profileSelect.append(option);
+    });
+    this.ui.profileSelect.value = this.activeProfileId;
   }
 
   toggleCharacterSheet() {
@@ -273,6 +423,7 @@ export class Game {
     const healthPercent = (player.health / player.maxHealth) * 100;
     const coordinates = `${Math.floor(player.x / TILE_SIZE)}, ${Math.floor(player.y / TILE_SIZE)}`;
 
+    this.ui.playerName.textContent = player.name;
     this.ui.level.textContent = player.level;
     this.ui.xpLabel.textContent = `${player.xp} / ${player.nextLevelXp} XP`;
     this.ui.xpBar.style.width = `${xpPercent}%`;
@@ -281,6 +432,7 @@ export class Game {
     this.ui.attack.textContent = player.attack;
     this.ui.creatureCount.textContent = this.creatures.filter((creature) => creature.alive).length;
     this.ui.coordinates.textContent = coordinates;
+    this.ui.sheetPlayerName.textContent = player.name;
     this.ui.sheetLevel.textContent = player.level;
     this.ui.sheetXpLabel.textContent = `${player.xp} / ${player.nextLevelXp} XP`;
     this.ui.sheetXpBar.style.width = `${xpPercent}%`;
@@ -358,5 +510,9 @@ export class Game {
     this.ui.openCharacterSheet.removeEventListener("click", this.onOpenCharacterSheet);
     this.ui.closeCharacterSheet.removeEventListener("click", this.onCloseCharacterSheet);
     this.ui.characterSheet.removeEventListener("click", this.onCharacterSheetBackdropClick);
+    this.ui.profileSelect.removeEventListener("change", this.onProfileChange);
+    this.ui.showProfileForm.removeEventListener("click", this.onShowProfileForm);
+    this.ui.cancelProfileForm.removeEventListener("click", this.onCancelProfileForm);
+    this.ui.newProfileForm.removeEventListener("submit", this.onSubmitProfileForm);
   }
 }

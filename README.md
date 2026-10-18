@@ -29,9 +29,10 @@ npm test
 - **WASD** o **flechas**: moverse.
 - **Espacio** o **clic**: atacar a una criatura cercana.
 - **I**: abrir o cerrar la ficha del personaje.
+- Desde la ficha puedes crear y cambiar de personaje.
 - **Poción de vida**: pulsa su casilla en el inventario para recuperar hasta 30 puntos de vida.
 - Las criaturas derrotadas dejan gelatina y monedas; a veces también una poción de vida.
-- El nivel, la experiencia, la salud y el inventario se guardan automáticamente en este navegador.
+- El nivel, la experiencia, la salud y el inventario de cada personaje se guardan automáticamente en este navegador.
 
 ## Estructura
 

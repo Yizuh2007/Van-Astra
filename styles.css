@@ -112,6 +112,16 @@ kbd { display: inline-grid; min-width: 18px; height: 19px; place-items: center; 
 .sheet-identity { display: flex; align-items: center; gap: 12px; padding: 18px 0; border-bottom: 1px solid #2a3638; }
 .sheet-identity .avatar { width: 50px; height: 50px; border-radius: 13px; font-size: 23px; }
 .sheet-identity h3 { margin: 0 0 4px; font-size: 14px; }
+.sheet-profiles { padding: 16px 0 0; }
+.sheet-profiles .sheet-stat-heading { margin-bottom: 8px; }
+.sheet-profiles label, .new-profile-form label { color: #9ba7a4; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; }
+.profile-select, .new-profile-form input { min-width: 0; width: 100%; padding: 8px 9px; border: 1px solid #35433d; border-radius: 5px; background: #141c20; color: var(--text); font: inherit; font-size: 11px; }
+.profile-action { padding: 7px 9px; border: 1px solid #35433d; border-radius: 5px; background: #1b2528; color: #c4d1c4; cursor: pointer; font-family: var(--mono); font-size: 8px; letter-spacing: .06em; }
+.profile-action:hover { border-color: #607451; background: #222e2b; }
+.new-profile-form { display: grid; gap: 8px; margin-top: 10px; padding: 11px; border: 1px solid #2e3a3c; border-radius: 7px; background: rgb(29 39 42 / 62%); }
+.new-profile-form[hidden] { display: none; }
+.profile-form-buttons { display: flex; justify-content: end; gap: 7px; }
+.new-profile-form p { margin: 0; color: #e08d82; font-size: 10px; }
 .sheet-level { display: grid; gap: 4px; margin-left: auto; color: #9ba7a4; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-align: right; }
 .sheet-level strong { color: #d6e2bd; font-size: 18px; font-weight: 500; }
 .sheet-experience { padding: 17px 0; }

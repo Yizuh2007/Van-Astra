@@ -57,6 +57,8 @@ test("el guardado local conserva el progreso y el inventario", () => {
   try {
     const savedGame = Object.create(Game.prototype);
     savedGame.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    savedGame.profiles = [{ id: "viajero", name: "Viajero" }];
+    savedGame.activeProfileId = "viajero";
     savedGame.player.level = 3;
     savedGame.player.xp = 25;
     savedGame.player.nextLevelXp = 200;
@@ -73,6 +75,8 @@ test("el guardado local conserva el progreso y el inventario", () => {
 
     const loadedGame = Object.create(Game.prototype);
     loadedGame.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    loadedGame.profiles = [];
+    loadedGame.activeProfileId = null;
     loadedGame.world = new World();
     loadedGame.inventory = new Inventory();
     loadedGame.ui = { message: { textContent: "" } };
@@ -82,9 +86,171 @@ test("el guardado local conserva el progreso y el inventario", () => {
     assert.equal(loadedGame.player.level, 3);
     assert.equal(loadedGame.player.xp, 25);
     assert.equal(loadedGame.player.health, 65);
+    assert.equal(loadedGame.player.name, "Viajero");
     assert.equal(loadedGame.player.x, PLAYER_START.x + TILE_SIZE);
     assert.equal(loadedGame.inventory.count("health-potion"), 2);
     assert.equal(loadedGame.inventory.count("gold-coin"), 6);
+  } finally {
+    if (previousStorage) {
+      Object.defineProperty(globalThis, "localStorage", previousStorage);
+    } else {
+      delete globalThis.localStorage;
+    }
+  }
+});
+
+test("la partida antigua pasa al primer perfil sin perder el inventario", () => {
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const values = new Map([[
+    "van-astra-save-v1",
+    JSON.stringify({
+      version: 1,
+      player: {
+        x: PLAYER_START.x,
+        y: PLAYER_START.y,
+        level: 2,
+        xp: 20,
+        nextLevelXp: 150,
+        attack: 15,
+        maxHealth: 120,
+        health: 90,
+      },
+      inventory: [{ itemId: "gold-coin", quantity: 9 }],
+    }),
+  ]]);
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, value),
+    },
+  });
+
+  try {
+    const game = Object.create(Game.prototype);
+    game.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    game.world = new World();
+    game.inventory = new Inventory();
+    game.profiles = [];
+    game.activeProfileId = null;
+    game.ui = { message: { textContent: "" } };
+    game.messageTimer = 0;
+
+    assert.equal(game.loadGame(), true);
+    assert.equal(game.player.name, "Viajero");
+    assert.equal(game.player.level, 2);
+    assert.equal(game.inventory.count("gold-coin"), 9);
+    assert.ok(values.has("van-astra-profiles-v1"));
+  } finally {
+    if (previousStorage) {
+      Object.defineProperty(globalThis, "localStorage", previousStorage);
+    } else {
+      delete globalThis.localStorage;
+    }
+  }
+});
+
+test("cada perfil conserva por separado el personaje y el inventario", () => {
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const values = new Map();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, value),
+    },
+  });
+
+  try {
+    const savedPlayer = (name, health) => ({
+      name,
+      x: PLAYER_START.x,
+      y: PLAYER_START.y,
+      level: 1,
+      xp: 0,
+      nextLevelXp: 100,
+      attack: 12,
+      maxHealth: 100,
+      health,
+    });
+    const game = Object.create(Game.prototype);
+    game.world = new World();
+    game.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    game.inventory = new Inventory();
+    game.profiles = [
+      {
+        id: "viajero",
+        name: "Viajero",
+        player: savedPlayer("Viajero", 80),
+        inventory: [{ itemId: "health-potion", quantity: 1 }],
+      },
+      {
+        id: "exploradora",
+        name: "Exploradora",
+        player: savedPlayer("Exploradora", 60),
+        inventory: [{ itemId: "gold-coin", quantity: 7 }],
+      },
+    ];
+    game.activeProfileId = "viajero";
+    game.loadProfile(game.profiles[0]);
+    game.ui = { message: { textContent: "" } };
+    game.renderProfiles = () => {};
+    game.updateHud = () => {};
+    game.renderInventory = () => {};
+
+    game.switchProfile("exploradora");
+    assert.equal(game.player.name, "Exploradora");
+    assert.equal(game.inventory.count("gold-coin"), 7);
+    game.player.health = 45;
+
+    game.switchProfile("viajero");
+    assert.equal(game.player.health, 80);
+    assert.equal(game.inventory.count("health-potion"), 1);
+    game.switchProfile("exploradora");
+    assert.equal(game.player.health, 45);
+  } finally {
+    if (previousStorage) {
+      Object.defineProperty(globalThis, "localStorage", previousStorage);
+    } else {
+      delete globalThis.localStorage;
+    }
+  }
+});
+
+test("se puede crear un perfil con nombre propio y una poción inicial", () => {
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const values = new Map();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, value),
+    },
+  });
+
+  try {
+    const game = Object.create(Game.prototype);
+    game.world = new World();
+    game.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    game.inventory = new Inventory();
+    game.profiles = [{ id: "viajero", name: "Viajero" }];
+    game.activeProfileId = "viajero";
+    game.ui = {
+      message: { textContent: "" },
+      profileFormMessage: { textContent: "" },
+      newProfileForm: { reset() {}, hidden: false },
+    };
+    game.renderProfiles = () => {};
+    game.updateHud = () => {};
+    game.renderInventory = () => {};
+
+    assert.equal(game.createProfile(" Lira "), true);
+    assert.equal(game.player.name, "Lira");
+    assert.equal(game.inventory.count("health-potion"), 1);
+    assert.equal(game.profiles.length, 2);
+    assert.equal(game.profiles[0].name, "Viajero");
+    assert.equal(game.profiles[1].name, "Lira");
+    assert.equal(game.createProfile("lira"), false);
   } finally {
     if (previousStorage) {
       Object.defineProperty(globalThis, "localStorage", previousStorage);

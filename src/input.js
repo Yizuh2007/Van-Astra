@@ -15,6 +15,9 @@ export class Input {
   }
 
   onKeyDown = (event) => {
+    const targetTag = event.target?.tagName;
+    if (["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(targetTag)) return;
+
     if (MOVEMENT_KEYS.has(event.code) || event.code === "Space") {
       event.preventDefault();
     }
