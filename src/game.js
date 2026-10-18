@@ -96,7 +96,7 @@ export class Game {
       }
 
       creature.update(delta, this.player, this.world);
-      if (this.player.dead || creature.attackCooldown > 0) continue;
+      if (this.player.dead || this.player.invulnerabilityTimer > 0 || creature.attackCooldown > 0) continue;
 
       if (Math.hypot(this.player.x - creature.x, this.player.y - creature.y) < 30) {
         creature.attackCooldown = 1.25;

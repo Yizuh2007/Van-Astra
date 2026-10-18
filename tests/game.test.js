@@ -29,6 +29,20 @@ test("la poción recupera vida sin superar el máximo", () => {
   assert.equal(player.health, player.maxHealth);
 });
 
+test("un golpe da unos instantes de protección antes del siguiente", () => {
+  const player = new Player(100, 100);
+  const world = { isBlocked: () => false };
+
+  assert.equal(player.takeDamage(5), false);
+  assert.equal(player.health, 95);
+  assert.equal(player.takeDamage(5), false);
+  assert.equal(player.health, 95);
+
+  player.update(player.invulnerabilityTimer + 0.01, { x: 0, y: 0 }, world);
+  assert.equal(player.takeDamage(5), false);
+  assert.equal(player.health, 90);
+});
+
 test("el guardado local conserva el progreso y el inventario", () => {
   const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
   const values = new Map();

@@ -209,6 +209,14 @@ export function drawCharacter(context, player) {
   }
   if (facingY >= 0) drawSword(context, player.x, player.y, facingX, facingY);
 
+  if (player.damageFlash > 0) {
+    context.strokeStyle = `rgba(235, 112, 99, ${Math.min(0.9, player.damageFlash * 5)})`;
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(player.x, player.y, 19, 0, Math.PI * 2);
+    context.stroke();
+  }
+
   if (player.attackAnimation > 0) {
     const angle = Math.atan2(facingY, facingX);
     context.strokeStyle = `rgba(218, 239, 153, ${Math.min(1, player.attackAnimation * 4)})`;

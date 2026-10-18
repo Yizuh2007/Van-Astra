@@ -1,5 +1,9 @@
 import { drawCharacter } from "./character.js";
 
+const DAMAGE_PROTECTION_DURATION = 0.65;
+const RESPAWN_PROTECTION_DURATION = 0.75;
+const DAMAGE_FLASH_DURATION = 0.18;
+
 export class Player {
   constructor(x, y) {
     this.x = x;
@@ -19,6 +23,8 @@ export class Player {
     this.moving = false;
     this.attackCooldown = 0;
     this.attackAnimation = 0;
+    this.invulnerabilityTimer = 0;
+    this.damageFlash = 0;
     this.dead = false;
     this.respawnTimer = 0;
   }
@@ -26,6 +32,8 @@ export class Player {
   update(delta, direction, world) {
     this.attackCooldown = Math.max(0, this.attackCooldown - delta);
     this.attackAnimation = Math.max(0, this.attackAnimation - delta);
+    this.invulnerabilityTimer = Math.max(0, this.invulnerabilityTimer - delta);
+    this.damageFlash = Math.max(0, this.damageFlash - delta);
     this.animationTime += delta;
     this.moving = !this.dead && (direction.x !== 0 || direction.y !== 0);
     if (this.dead) return;
@@ -41,9 +49,14 @@ export class Player {
   }
 
   takeDamage(amount) {
-    if (this.dead) return false;
+    // Evita que varias criaturas quiten vida en el mismo instante.
+    if (this.dead || this.invulnerabilityTimer > 0) return false;
     this.health = Math.max(0, this.health - amount);
-    if (this.health > 0) return false;
+    this.damageFlash = DAMAGE_FLASH_DURATION;
+    if (this.health > 0) {
+      this.invulnerabilityTimer = DAMAGE_PROTECTION_DURATION;
+      return false;
+    }
 
     this.dead = true;
     this.respawnTimer = 1.5;
@@ -81,6 +94,8 @@ export class Player {
     this.health = this.maxHealth;
     this.dead = false;
     this.respawnTimer = 0;
+    this.invulnerabilityTimer = RESPAWN_PROTECTION_DURATION;
+    this.damageFlash = 0;
   }
 
   draw(context) {
