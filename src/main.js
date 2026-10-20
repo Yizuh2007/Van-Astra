@@ -1,3 +1,4 @@
+import { AuthMenu } from "./auth-menu.js";
 import { Game } from "./game.js";
 
 const canvas = document.querySelector("#game-canvas");
@@ -6,7 +7,7 @@ if (!(canvas instanceof HTMLCanvasElement)) {
   throw new Error("No se ha encontrado el canvas del juego.");
 }
 
-const ui = {
+const gameUi = {
   level: document.querySelector("#player-level"),
   playerName: document.querySelector("#player-name"),
   xpLabel: document.querySelector("#player-xp-label"),
@@ -38,9 +39,52 @@ const ui = {
   profileFormMessage: document.querySelector("#profile-form-message"),
 };
 
-const game = new Game(canvas, ui);
-game.start();
+let game = null;
+let authMenu;
+
+const exitGame = () => {
+  game?.destroy();
+  game = null;
+};
+
+const authUi = {
+  authScreen: document.querySelector("#auth-screen"),
+  authTitle: document.querySelector("#auth-title"),
+  authDescription: document.querySelector("#auth-description"),
+  authConfigWarning: document.querySelector("#auth-config-warning"),
+  authForm: document.querySelector("#auth-form"),
+  authEmailField: document.querySelector("#auth-email-field"),
+  authEmail: document.querySelector("#auth-email"),
+  authPasswordField: document.querySelector("#auth-password-field"),
+  authPassword: document.querySelector("#auth-password"),
+  authPasswordLabel: document.querySelector("#auth-password-label"),
+  authSubmit: document.querySelector("#auth-submit"),
+  authMessage: document.querySelector("#auth-message"),
+  authModeToggle: document.querySelector("#auth-mode-toggle"),
+  authResetToggle: document.querySelector("#auth-reset-toggle"),
+  authDemoButton: document.querySelector("#auth-demo-button"),
+  mainMenu: document.querySelector("#main-menu"),
+  menuStatus: document.querySelector("#menu-status"),
+  menuUser: document.querySelector("#menu-user"),
+  menuPlay: document.querySelector("#menu-play"),
+  menuSignOut: document.querySelector("#menu-sign-out"),
+  gameShell: document.querySelector("#game-shell"),
+  backToMenu: document.querySelector("#back-to-menu"),
+};
+
+authMenu = new AuthMenu(authUi, {
+  onStartGame: (userId) => {
+    exitGame();
+    game = new Game(canvas, gameUi, userId);
+    game.start();
+  },
+  onExitGame: exitGame,
+});
+void authMenu.initialize();
 
 if (import.meta.hot) {
-  import.meta.hot.dispose(() => game.destroy());
+  import.meta.hot.dispose(() => {
+    authMenu.destroy();
+    exitGame();
+  });
 }

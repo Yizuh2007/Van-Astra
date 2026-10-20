@@ -4,19 +4,28 @@ Prototipo inicial de un MMORPG de fantasía en 2D, inspirado en los juegos de av
 
 ## Estado actual
 
-La primera versión es un prototipo local en el navegador. El aventurero tiene un diseño pixel art original, vistas en cuatro direcciones y animación básica al caminar y atacar. Sirve como punto de partida para construir el mundo y probar el bucle básico de exploración y combate; todavía no incluye cuentas ni multijugador en red. El progreso se guarda en este navegador.
+La primera versión es un prototipo local en el navegador. El aventurero tiene un diseño pixel art original, vistas en cuatro direcciones y animación básica al caminar y atacar. El acceso por correo usa Supabase cuando se configura; el progreso todavía se guarda localmente y no hay multijugador en red.
 
-## Ejecutar
+## Inicio y desarrollo
 
-No hacen falta dependencias ni un proceso de compilación. Con Python 3, inicia el servidor estático:
+Instala las dependencias y arranca el servidor de desarrollo:
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-También puedes iniciarlo con `npm run serve`.
+Necesitas Node.js **20.19+** o **22.12+**. Abre [http://localhost:5173](http://localhost:5173) en el navegador. Para generar una versión de producción, usa `npm run build`.
 
-Abre [http://localhost:8000](http://localhost:8000) en el navegador.
+## Configurar el acceso por correo
+
+1. Crea un proyecto en Supabase y abre la configuración de **API**.
+2. Copia `.env.example` como `.env.local`.
+3. Completa `VITE_SUPABASE_URL` con la URL del proyecto y `VITE_SUPABASE_ANON_KEY` con la clave pública `anon` o `publishable`.
+4. En Supabase, configura la URL local `http://localhost:5173` como sitio y destino permitido para los enlaces de confirmación y recuperación.
+5. Reinicia `npm run dev`.
+
+No pongas claves `service_role` en el cliente ni en GitHub. Mientras Supabase no esté configurado, puedes entrar en modo local; el juego guarda los perfiles en este navegador, separados por usuario cuando se inicia sesión, pero todavía no los sincroniza con la nube.
 
 Para ejecutar las pruebas de lógica con Node.js:
 
@@ -30,6 +39,7 @@ npm test
 - **Espacio** o **clic**: atacar a una criatura cercana.
 - **I**: abrir o cerrar la ficha del personaje.
 - Desde la ficha puedes crear y cambiar de personaje.
+- Desde el menú inicial puedes entrar con correo, crear una cuenta, recuperar la contraseña o probar el modo local.
 - **Poción de vida**: pulsa su casilla en el inventario para recuperar hasta 30 puntos de vida.
 - Las criaturas derrotadas dejan gelatina y monedas; a veces también una poción de vida.
 - El nivel, la experiencia, la salud y el inventario de cada personaje se guardan automáticamente en este navegador.
@@ -41,6 +51,10 @@ index.html       Interfaz del juego
 styles.css       Estilos adaptables
 src/             Lógica del cliente, el mundo y el inventario (JavaScript nativo)
 src/character.js Renderizado pixel art del personaje
+src/auth-menu.js Login, registro, recuperación y menú inicial
+src/supabase-client.js Cliente de autenticación Supabase
+.env.example     Plantilla de configuración de Supabase
+vite.config.js   Configuración de Vite
 assets/sprites/  Arte fuente .ase y PNG usados por el juego
 tests/           Pruebas de lógica con el ejecutor integrado de Node.js
 ```

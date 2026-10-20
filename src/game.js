@@ -8,10 +8,13 @@ const SAVE_KEY = "van-astra-save-v1";
 const PROFILES_SAVE_KEY = "van-astra-profiles-v1";
 
 export class Game {
-  constructor(canvas, ui) {
+  constructor(canvas, ui, storageUserId = null) {
     this.canvas = canvas;
     this.context = canvas.getContext("2d");
     this.ui = ui;
+    this.storageUserId = typeof storageUserId === "string" && storageUserId
+      ? storageUserId
+      : null;
     this.world = new World();
     this.player = new Player(PLAYER_START.x, PLAYER_START.y);
     this.inventory = new Inventory(INVENTORY_CAPACITY);
@@ -211,7 +214,7 @@ export class Game {
 
   loadGame() {
     try {
-      const storedProfiles = localStorage.getItem(PROFILES_SAVE_KEY);
+      const storedProfiles = localStorage.getItem(this.storageKey(PROFILES_SAVE_KEY));
       if (storedProfiles) {
         const saved = JSON.parse(storedProfiles);
         if (saved?.version === 1 && Array.isArray(saved.profiles)) {
@@ -237,7 +240,7 @@ export class Game {
     }
 
     try {
-      const oldSave = JSON.parse(localStorage.getItem(SAVE_KEY));
+      const oldSave = JSON.parse(localStorage.getItem(this.storageKey(SAVE_KEY)));
       if (oldSave?.version === 1 && oldSave.player) {
         const oldProfile = {
           id: "default",
@@ -313,7 +316,7 @@ export class Game {
       profile.name = this.player.name;
       profile.player = this.serializePlayer();
       profile.inventory = this.inventory.slots;
-      localStorage.setItem(PROFILES_SAVE_KEY, JSON.stringify({
+      localStorage.setItem(this.storageKey(PROFILES_SAVE_KEY), JSON.stringify({
         version: 1,
         activeProfileId: this.activeProfileId,
         profiles: this.profiles,
@@ -322,6 +325,10 @@ export class Game {
     } catch {
       return false;
     }
+  }
+
+  storageKey(key) {
+    return this.storageUserId ? `${key}:${this.storageUserId}` : key;
   }
 
   createProfile(name) {
