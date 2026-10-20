@@ -99,6 +99,17 @@ test("el guardado local conserva el progreso y el inventario", () => {
   }
 });
 
+test("las cuentas usan espacios de guardado local separados", () => {
+  const game = Object.create(Game.prototype);
+  game.storageUserId = "user-a";
+
+  assert.equal(game.storageKey("van-astra-profiles-v1"), "van-astra-profiles-v1:user-a");
+  game.storageUserId = "user-b";
+  assert.equal(game.storageKey("van-astra-profiles-v1"), "van-astra-profiles-v1:user-b");
+  game.storageUserId = null;
+  assert.equal(game.storageKey("van-astra-profiles-v1"), "van-astra-profiles-v1");
+});
+
 test("la partida antigua pasa al primer perfil sin perder el inventario", () => {
   const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
   const values = new Map([[

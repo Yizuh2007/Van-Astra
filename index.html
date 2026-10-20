@@ -18,7 +18,81 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <section id="auth-screen" class="auth-screen" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <a class="brand auth-brand" href="#inicio" aria-label="Van Astra, inicio">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span class="brand-copy">
+            <strong>VAN ASTRA</strong>
+            <small>CRÓNICAS DE ELDORIA</small>
+          </span>
+        </a>
+        <p class="eyebrow">TU AVENTURA COMIENZA AQUÍ</p>
+        <h1 id="auth-title">Inicia sesión</h1>
+        <p id="auth-description" class="auth-description">Entra en Eldoria con tu cuenta.</p>
+
+        <p id="auth-config-warning" class="auth-config-warning" role="status" hidden>
+          El acceso por correo necesita la configuración de Supabase. Puedes probar el juego en modo local mientras tanto.
+        </p>
+
+        <form id="auth-form" class="auth-form">
+          <div id="auth-email-field" class="auth-field">
+            <label for="auth-email">Correo electrónico</label>
+            <input
+              id="auth-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="tu@correo.com"
+              required
+            />
+          </div>
+          <div id="auth-password-field" class="auth-field">
+            <label id="auth-password-label" for="auth-password">Contraseña</label>
+            <input
+              id="auth-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              minlength="8"
+              placeholder="Mínimo 8 caracteres"
+              required
+            />
+          </div>
+          <button id="auth-submit" class="auth-submit" type="submit">Entrar</button>
+        </form>
+        <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+
+        <div class="auth-links">
+          <button id="auth-mode-toggle" class="text-button" type="button">Crear cuenta</button>
+          <button id="auth-reset-toggle" class="text-button" type="button">¿Olvidaste tu contraseña?</button>
+        </div>
+
+        <div class="auth-divider"><span>o</span></div>
+        <button id="auth-demo-button" class="auth-demo-button" type="button">Probar en modo local</button>
+      </div>
+    </section>
+
+    <section id="main-menu" class="main-menu" aria-labelledby="menu-title" hidden>
+      <div class="menu-card">
+        <a class="brand auth-brand" href="#inicio" aria-label="Van Astra, inicio">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span class="brand-copy">
+            <strong>VAN ASTRA</strong>
+            <small>CRÓNICAS DE ELDORIA</small>
+          </span>
+        </a>
+        <p id="menu-status" class="menu-status">SESIÓN CONECTADA</p>
+        <h1 id="menu-title">Tu aventura te espera</h1>
+        <p id="menu-user" class="menu-user"></p>
+        <button id="menu-play" class="auth-submit menu-play" type="button">Entrar en Eldoria</button>
+        <button id="menu-sign-out" class="text-button menu-sign-out" type="button">Cerrar sesión</button>
+        <p class="menu-note">Los personajes y el progreso de esta demo se guardan en este navegador.</p>
+      </div>
+    </section>
+
+    <main id="game-shell" class="app-shell" hidden>
       <header class="topbar">
         <a class="brand" href="#inicio" aria-label="Van Astra, inicio">
           <span class="brand-mark" aria-hidden="true">✦</span>
@@ -27,9 +101,12 @@
             <small>CRÓNICAS DE ELDORIA</small>
           </span>
         </a>
-        <div class="server-status">
-          <span class="status-dot" aria-hidden="true"></span>
-          <span>PROTOTIPO LOCAL</span>
+        <div class="topbar-actions">
+          <button id="back-to-menu" class="menu-return" type="button">MENÚ</button>
+          <div class="server-status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>PROTOTIPO LOCAL</span>
+          </div>
         </div>
       </header>
 

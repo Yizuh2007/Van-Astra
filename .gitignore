@@ -3,3 +3,6 @@ Thumbs.db
 node_modules/
 dist/
 .vscode/
+.env
+.env.*
+!.env.example
