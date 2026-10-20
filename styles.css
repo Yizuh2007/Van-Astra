@@ -81,6 +81,15 @@ kbd { display: inline-grid; min-width: 18px; height: 19px; place-items: center; 
 .stat-divider { height: 1px; margin: 2px 0 11px; background: #29343a; }
 .detail-row { margin-top: 8px; color: #849298; }
 .detail-row strong { color: #d7e1d8; }
+.quest-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.quest-heading .eyebrow { margin: 0; }
+.quest-state { color: #b4c58b; font-family: var(--mono); font-size: 8px; letter-spacing: .07em; }
+.quest-state.is-complete { color: #94d4a1; }
+.quest-panel h2 { margin: 0 0 13px; font-size: 13px; font-weight: 600; }
+.quest-progress-row { display: flex; justify-content: space-between; margin-bottom: 7px; color: #aab5af; font-family: var(--mono); font-size: 9px; }
+.quest-progress-row strong { color: #dfe7dd; font-weight: 400; }
+.quest-fill { background: linear-gradient(90deg, #92ba5b, #c2dd7f); }
+.quest-reward { margin: 9px 0 0; color: #849298; font-size: 9px; }
 .inventory-panel { padding-bottom: 14px; }
 .inventory-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .inventory-heading .eyebrow { margin: 0; }
