@@ -2,6 +2,7 @@ import { CREATURE_SPAWNS, PLAYER_START, TILE_SIZE, VIEWPORT } from "./config.js"
 import { Player, Slime } from "./entities.js";
 import { Input } from "./input.js";
 import { INVENTORY_CAPACITY, Inventory, ITEMS } from "./inventory.js";
+import { QuestTracker, STARTER_QUEST } from "./quests.js";
 import { World } from "./world.js";
 
 const SAVE_KEY = "van-astra-save-v1";
@@ -15,6 +16,7 @@ export class Game {
     this.world = new World();
     this.player = new Player(PLAYER_START.x, PLAYER_START.y);
     this.inventory = new Inventory(INVENTORY_CAPACITY);
+    this.quest = new QuestTracker();
     this.profiles = [];
     this.activeProfileId = null;
     this.creatures = CREATURE_SPAWNS.map(({ x, y }, index) => (
@@ -36,6 +38,7 @@ export class Game {
         name: this.player.name,
         player: this.serializePlayer(),
         inventory: this.inventory.slots,
+        quest: this.quest.serialize(),
       }];
       this.saveGame();
     }
@@ -176,12 +179,18 @@ export class Game {
 
     const defeated = target.takeDamage(this.player.attack);
     if (defeated) {
-      const levelsGained = this.player.gainExperience(target.experience);
+      let levelsGained = this.player.gainExperience(target.experience);
+      const questCompleted = this.quest.recordKill();
       const gelLeftover = this.inventory.add("slime-gel", 1);
       const coinLeftover = this.inventory.add("gold-coin", 3);
       let potionLeftover = 0;
+      let questGoldLeftover = 0;
       const loot = [];
 
+      if (questCompleted) {
+        levelsGained += this.player.gainExperience(STARTER_QUEST.rewardExperience);
+        questGoldLeftover = this.inventory.add("gold-coin", STARTER_QUEST.rewardGold);
+      }
       if (Math.random() < 0.3) {
         potionLeftover = this.inventory.add("health-potion", 1);
         if (potionLeftover === 0) loot.push("poción de vida x1");
@@ -191,8 +200,14 @@ export class Game {
 
       const message = [`¡Criatura derrotada! +${target.experience} XP.`];
       if (levelsGained > 0) message.push(`¡Nivel ${this.player.level}! Ataque y vida aumentados.`);
+      if (questCompleted) {
+        const rewardGold = STARTER_QUEST.rewardGold - questGoldLeftover;
+        message.push(`¡Misión completada! +${STARTER_QUEST.rewardExperience} XP y ${rewardGold} monedas.`);
+      } else if (!this.quest.completed) {
+        message.push(`Misión: ${this.quest.kills}/${STARTER_QUEST.target} limos.`);
+      }
       if (loot.length > 0) message.push(`Botín: ${loot.join(", ")}.`);
-      if (gelLeftover > 0 || coinLeftover > 0 || potionLeftover > 0) {
+      if (gelLeftover > 0 || coinLeftover > 0 || potionLeftover > 0 || questGoldLeftover > 0) {
         message.push("Inventario lleno: no se guardó todo el botín.");
       }
       this.notify(message.join(" "));
@@ -289,6 +304,7 @@ export class Game {
 
     this.inventory = new Inventory(INVENTORY_CAPACITY);
     this.inventory.restore(profile.inventory);
+    this.quest = new QuestTracker(profile.quest);
   }
 
   serializePlayer(player = this.player) {
@@ -313,6 +329,7 @@ export class Game {
       profile.name = this.player.name;
       profile.player = this.serializePlayer();
       profile.inventory = this.inventory.slots;
+      profile.quest = this.quest.serialize();
       localStorage.setItem(PROFILES_SAVE_KEY, JSON.stringify({
         version: 1,
         activeProfileId: this.activeProfileId,
@@ -349,6 +366,7 @@ export class Game {
       name: trimmedName,
       player: this.serializePlayer(player),
       inventory: inventory.slots,
+      quest: new QuestTracker().serialize(),
     };
     this.profiles.push(profile);
     this.activeProfileId = profile.id;
@@ -432,6 +450,10 @@ export class Game {
     this.ui.attack.textContent = player.attack;
     this.ui.creatureCount.textContent = this.creatures.filter((creature) => creature.alive).length;
     this.ui.coordinates.textContent = coordinates;
+    this.ui.questProgress.textContent = `${this.quest.kills} / ${STARTER_QUEST.target}`;
+    this.ui.questBar.style.width = `${(this.quest.kills / STARTER_QUEST.target) * 100}%`;
+    this.ui.questState.textContent = this.quest.completed ? "COMPLETADA" : "EN CURSO";
+    this.ui.questState.classList.toggle("is-complete", this.quest.completed);
     this.ui.sheetPlayerName.textContent = player.name;
     this.ui.sheetLevel.textContent = player.level;
     this.ui.sheetXpLabel.textContent = `${player.xp} / ${player.nextLevelXp} XP`;

@@ -30,6 +30,7 @@ npm test
 - **Espacio** o **clic**: atacar a una criatura cercana.
 - **I**: abrir o cerrar la ficha del personaje.
 - Desde la ficha puedes crear y cambiar de personaje.
+- Completa la misión de caza derrotando tres limos para ganar experiencia y monedas.
 - **Poción de vida**: pulsa su casilla en el inventario para recuperar hasta 30 puntos de vida.
 - Las criaturas derrotadas dejan gelatina y monedas; a veces también una poción de vida.
 - El nivel, la experiencia, la salud y el inventario de cada personaje se guardan automáticamente en este navegador.
@@ -39,7 +40,7 @@ npm test
 ```text
 index.html       Interfaz del juego
 styles.css       Estilos adaptables
-src/             Lógica del cliente, el mundo y el inventario (JavaScript nativo)
+src/             Lógica del cliente, el mundo, las misiones y el inventario (JavaScript nativo)
 src/character.js Renderizado pixel art del personaje
 assets/sprites/  Arte fuente .ase y PNG usados por el juego
 tests/           Pruebas de lógica con el ejecutor integrado de Node.js
