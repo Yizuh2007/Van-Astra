@@ -4,6 +4,7 @@ import { Game } from "../src/game.js";
 import { Player, Slime } from "../src/entities.js";
 import { PLAYER_START, TILE_SIZE } from "../src/config.js";
 import { Inventory } from "../src/inventory.js";
+import { QuestTracker } from "../src/quests.js";
 import { World } from "../src/world.js";
 
 test("el jugador sube de nivel y conserva la experiencia sobrante", () => {
@@ -57,6 +58,7 @@ test("el guardado local conserva el progreso y el inventario", () => {
   try {
     const savedGame = Object.create(Game.prototype);
     savedGame.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    savedGame.quest = new QuestTracker();
     savedGame.profiles = [{ id: "viajero", name: "Viajero" }];
     savedGame.activeProfileId = "viajero";
     savedGame.player.level = 3;
@@ -70,6 +72,7 @@ test("el guardado local conserva el progreso y el inventario", () => {
     savedGame.inventory = new Inventory();
     savedGame.inventory.add("health-potion", 2);
     savedGame.inventory.add("gold-coin", 6);
+    savedGame.quest.recordKill();
 
     assert.equal(savedGame.saveGame(), true);
 
@@ -90,6 +93,7 @@ test("el guardado local conserva el progreso y el inventario", () => {
     assert.equal(loadedGame.player.x, PLAYER_START.x + TILE_SIZE);
     assert.equal(loadedGame.inventory.count("health-potion"), 2);
     assert.equal(loadedGame.inventory.count("gold-coin"), 6);
+    assert.equal(loadedGame.quest.kills, 1);
   } finally {
     if (previousStorage) {
       Object.defineProperty(globalThis, "localStorage", previousStorage);
@@ -176,6 +180,7 @@ test("cada perfil conserva por separado el personaje y el inventario", () => {
     const game = Object.create(Game.prototype);
     game.world = new World();
     game.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    game.quest = new QuestTracker();
     game.inventory = new Inventory();
     game.profiles = [
       {
@@ -183,12 +188,14 @@ test("cada perfil conserva por separado el personaje y el inventario", () => {
         name: "Viajero",
         player: savedPlayer("Viajero", 80),
         inventory: [{ itemId: "health-potion", quantity: 1 }],
+        quest: { kills: 1 },
       },
       {
         id: "exploradora",
         name: "Exploradora",
         player: savedPlayer("Exploradora", 60),
         inventory: [{ itemId: "gold-coin", quantity: 7 }],
+        quest: { kills: 2 },
       },
     ];
     game.activeProfileId = "viajero";
@@ -201,11 +208,13 @@ test("cada perfil conserva por separado el personaje y el inventario", () => {
     game.switchProfile("exploradora");
     assert.equal(game.player.name, "Exploradora");
     assert.equal(game.inventory.count("gold-coin"), 7);
+    assert.equal(game.quest.kills, 2);
     game.player.health = 45;
 
     game.switchProfile("viajero");
     assert.equal(game.player.health, 80);
     assert.equal(game.inventory.count("health-potion"), 1);
+    assert.equal(game.quest.kills, 1);
     game.switchProfile("exploradora");
     assert.equal(game.player.health, 45);
   } finally {
@@ -232,6 +241,7 @@ test("se puede crear un perfil con nombre propio y una poción inicial", () => {
     const game = Object.create(Game.prototype);
     game.world = new World();
     game.player = new Player(PLAYER_START.x, PLAYER_START.y);
+    game.quest = new QuestTracker();
     game.inventory = new Inventory();
     game.profiles = [{ id: "viajero", name: "Viajero" }];
     game.activeProfileId = "viajero";
@@ -258,6 +268,42 @@ test("se puede crear un perfil con nombre propio y una poción inicial", () => {
       delete globalThis.localStorage;
     }
   }
+});
+
+test("derrotar tres limos completa la misión y entrega sus recompensas", () => {
+  const player = new Player(100, 100);
+  const game = Object.create(Game.prototype);
+  game.player = player;
+  game.inventory = new Inventory();
+  game.quest = new QuestTracker();
+  game.creatures = Array.from({ length: 3 }, (_, index) => ({
+    alive: true,
+    x: 110 + index * 10,
+    y: 100,
+    experience: 35,
+    takeDamage() {
+      this.alive = false;
+      return true;
+    },
+  }));
+  game.ui = { message: { textContent: "" } };
+  game.messageTimer = 0;
+  game.notify = (message) => { game.ui.message.textContent = message; };
+  game.renderInventory = () => {};
+  game.updateHud = () => {};
+  game.saveGame = () => true;
+
+  for (let kill = 0; kill < 3; kill += 1) {
+    game.attack();
+    player.attackCooldown = 0;
+  }
+
+  assert.equal(game.quest.completed, true);
+  assert.equal(game.inventory.count("slime-gel"), 3);
+  assert.equal(game.inventory.count("gold-coin"), 29);
+  assert.equal(player.level, 2);
+  assert.equal(player.xp, 65);
+  assert.match(game.ui.message.textContent, /Misión completada/);
 });
 
 test("el jugador actualiza la orientación y la animación al moverse", () => {
